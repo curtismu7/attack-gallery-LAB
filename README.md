@@ -7,9 +7,10 @@ A self-contained gallery where an SE launches NAMED attacks against a mock MCP-s
 | Part | State |
 | --- | --- |
 | Engine: 10 attacks, 10 controls, mock good AS, evil AS, gateway, resource server, DCR proxy, SSRF fake network | built, tested |
-| API: `/api/catalog`, `/api/run`, `/api/controls`, `/api/reset`, `/api/health` (demo-health/1) | built, tested |
-| Web UI | skeleton only: lists the catalog. The gallery UI, ReactFlow diagram (movable boxes, Simulate, Reset, speed), story views, content pack and shelf entry are NOT built yet |
-| Docker, e2e browser tests | not built |
+| API: `/api/catalog`, `/api/run` (optional `controlsOff`), `/api/matrix`, `/api/controls`, `/api/reset`, `/api/health` (demo-health/1) | built, tested |
+| Web UI (GA1) | Gallery, attack page (ungoverned / governed / both, control toggle), controls table, compare matrix, honest limits, stories (kit story engine copy, generic + airlines + banking packs), ReactFlow diagram (movable boxes, Simulate, Reset, speed), presenter mode, light/dark. Tested with vitest + testing-library against the real server, and driven in Chromium by `npm run e2e` |
+| Content pack and shelf entry | NOT built yet |
+| Docker | not built |
 
 ## Attacks
 
@@ -40,6 +41,7 @@ npm start          # http://127.0.0.1:5181
 npm run dev        # API on 5181, Vite on 5182
 npm test
 npm run doctor
+npm run e2e         # needs npm run build first; drives the built app in Chromium, screenshots in .data/e2e-screenshots
 ```
 
 `.githooks/pre-commit` runs gitleaks on staged files when it is installed (`npm install` wires it).

@@ -48,3 +48,21 @@ test('POST /api/reset rotates the demo keys and runs still work', async () => {
   assert.equal(a.ok, true); assert.notEqual(a.keys.good, b.keys.good);
   assert.equal((await (await post('/api/run', { attackId: 'bad-client', mode: 'both' })).json()).runs.length, 2);
 });
+
+test('POST /api/run controlsOff turns the named control off on the governed side only', async () => {
+  const off = await (await post('/api/run', { attackId: 'wrong-scope', mode: 'governed', controlsOff: ['scope_check'] })).json();
+  assert.equal(off.runs[0].succeeded, true); assert.equal(off.runs[0].policy.scope_check, false); assert.equal(off.runs[0].policy.ownership_check, true);
+  const other = await (await post('/api/run', { attackId: 'wrong-scope', mode: 'governed', controlsOff: ['ownership_check'] })).json();
+  assert.equal(other.runs[0].succeeded, false);
+  assert.equal((await post('/api/run', { attackId: 'wrong-scope', mode: 'governed', controlsOff: ['nope'] })).status, 400);
+  assert.equal((await post('/api/run', { attackId: 'wrong-scope', mode: 'governed', controlsOff: 'scope_check' })).status, 400);
+});
+test('GET /api/matrix: with one control off, only that control\'s own attack succeeds', async () => {
+  const j = await (await fetch(`${base}/api/matrix`)).json();
+  const { ATTACKS } = await import('../src/catalog.js');
+  for (const a of ATTACKS) for (const c of j.controls) assert.equal(j.cells[a.id][c], c === a.control, `${a.id} x ${c}`);
+});
+test('responses carry a CSP that forbids inline script and outside connections', async () => {
+  const csp = (await fetch(`${base}/api/health`)).headers.get('content-security-policy');
+  assert.match(csp, /script-src 'self'/); assert.match(csp, /connect-src 'self'/); assert.ok(!/script-src[^;]*unsafe-inline/.test(csp));
+});

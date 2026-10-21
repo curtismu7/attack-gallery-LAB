@@ -1,0 +1,37 @@
+{
+  "id": "G1",
+  "title": "The agent used my token somewhere else",
+  "modes": ["audience-confusion"],
+  "goal": "{{mark}}'s token was issued for {{vocab.billing}}. An attacker wants to use it at {{vocab.gateway}} to read {{vocab.assets}}.",
+  "obstacle": "The token is genuine: real signature, real issuer, real user. Nothing about it looks forged.",
+  "control": "Audience binding: the server accepts a token only if its aud names that server. The MCP authorization page says servers MUST validate that tokens were issued for them; RFC 8707 has the authorization server restrict tokens to the named resource.",
+  "say": "A good token for one place must be worthless at every other place.",
+  "steps": [
+    { "n": 1, "title": "{{mark}}'s token is issued for {{vocab.billing}}",
+      "tell": "The authorization server issues a genuine token. Read the decoded claims: aud names {{vocab.billing}}, not {{vocab.gateway}}.",
+      "say": "This token is real and it is {{mark}}'s. It was made for {{vocab.billing}}.",
+      "why": "The audience is the token's address label. Everything else can be perfect and it is still the wrong address." },
+    { "n": 2, "title": "The attacker presents it at {{vocab.gateway}}",
+      "tell": "The same token arrives at a different server. Watch the request trail: the authorization header is redacted and the decoded claims are shown instead.",
+      "say": "Same token, different door.",
+      "why": "Passing a token to a server it was not issued for is the token passthrough pattern the MCP security page tells servers to refuse." },
+    { "n": 3, "title": "Does the server look at aud?",
+      "tell": "Ungoverned: signature and issuer check out, so the server accepts it. The flaw is the missing audience check, not a forged token.",
+      "say": "Signature valid is not the same as meant for me.",
+      "why": "Most of the checks pass. Only one question matters here.",
+      "blocked": { "tell": "Governed: the server compares aud with its own identifier and answers 401 invalid_token. The refusal names the control and the flag that turned it on.", "say": "The server asked whether the token was meant for it. It was not." } },
+    { "n": 4, "title": "What the attacker gets",
+      "tell": "Ungoverned: {{mark}}'s account list comes back, highlighted as the attacker's gain.",
+      "say": "No hacking, only a token in the wrong place.",
+      "why": "The damage is whatever the gateway lets any valid token do.",
+      "blocked": { "tell": "Governed: nothing comes back. There is no gain panel, only the refusal.", "say": "Nothing leaves." } },
+    { "n": 5, "title": "Prove the control is the reason",
+      "tell": "On the governed side, tick the toggle that turns audience binding off and launch again. The attack succeeds. Turn it back on and it fails again.",
+      "say": "I can switch the one control off and the attack works. That is the proof.",
+      "why": "A claim that a control stops an attack means little until removing it brings the attack back." }
+  ],
+  "proof": {
+    "happy": "The decoded token: aud is {{vocab.billing}}, yet the gateway returned data.",
+    "blocked": "401 invalid_token naming audience binding, with flag audience_binding ON; flip it OFF and the same attack succeeds."
+  }
+}

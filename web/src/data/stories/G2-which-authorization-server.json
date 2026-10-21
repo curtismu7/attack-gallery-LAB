@@ -1,0 +1,40 @@
+{
+  "id": "G2",
+  "title": "Which authorization server is this?",
+  "modes": ["issuer-mixup"],
+  "goal": "{{mark}} signs in. An attacker wants his authorization code to end up at {{vocab.evilAs}} instead of staying with the client.",
+  "obstacle": "The user signs in at {{vocab.goodAs}} and sees nothing wrong. The client started the flow with the wrong server and does not know it.",
+  "control": "Issuer check on the authorization response (RFC 9207): the client compares the iss parameter with the issuer of the server it sent the request to and rejects a mismatch.",
+  "say": "The client has to ask the response which server it came from, and reject the wrong answer.",
+  "steps": [
+    { "n": 1, "title": "The client starts with the wrong server",
+      "tell": "The client discovers {{vocab.evilAs}} and starts authorization there. It records the issuer it expects: the evil one.",
+      "say": "From here on, the client believes it is talking to the evil server.",
+      "why": "The client chose the server before any user interaction." },
+    { "n": 2, "title": "The evil server bounces {{mark}} to {{vocab.goodAs}}",
+      "tell": "The user is redirected to the real server, signs in normally and approves. {{vocab.goodAs}} answers the client with a code.",
+      "say": "{{mark}} did nothing unusual. He signed in at the real place.",
+      "why": "Nothing the user sees gives it away." },
+    { "n": 3, "title": "The response arrives with iss set to the real server",
+      "tell": "The response carries iss = {{vocab.goodAs}}'s issuer. The client expected the evil server's.",
+      "say": "The response says who it is from. Does the client read it?",
+      "why": "RFC 9207 puts the issuer in the response so a client can catch exactly this." },
+    { "n": 4, "title": "Does the client compare iss?",
+      "tell": "Ungoverned: the client ignores iss and sends the code and PKCE verifier to the token endpoint it believes in, the evil one.",
+      "say": "It handed {{mark}}'s code to the wrong server.",
+      "why": "The code and verifier are now in the attacker's hands.",
+      "blocked": { "tell": "Governed: the client compares iss with the issuer it expected, sees a mismatch and stops. It never sends the code.", "say": "Wrong issuer: stop, and keep the code." } },
+    { "n": 5, "title": "The attacker redeems the code",
+      "tell": "Ungoverned: the evil server redeems the code at the real server and lists {{mark}}'s accounts. Governed: this step never happens.",
+      "say": "A working token for {{mark}}, in the attacker's hands.",
+      "why": "The whole attack rests on one skipped comparison." },
+    { "n": 6, "title": "Prove the control is the reason",
+      "tell": "Turn the issuer check off on the governed side and launch again; the attack works. Turn it on and it is refused.",
+      "say": "One comparison, switched on and off, decides the outcome.",
+      "why": "It shows the control is the cause, not luck." }
+  ],
+  "proof": {
+    "happy": "The trail shows the evil server redeeming the code and a token for {{mark}} in its hands.",
+    "blocked": "The client's own refusal, iss_mismatch, with flag iss_check ON; the code is never sent."
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "generic",
+  "displayName": "Generic",
+  "tagline": "Agents calling tools on someone's behalf",
+  "source": "gallery default wording",
+  "vocab": { "billing": "the billing API", "gateway": "the MCP gateway", "goodAs": "the real sign-in service", "evilAs": "a look-alike sign-in service", "assets": "account data" },
+  "cast": { "mark": { "name": "Mark", "role": "Employee whose agent works for him" }, "mary": { "name": "Mary", "role": "A colleague with her own accounts" } }
+}

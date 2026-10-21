@@ -1,0 +1,8 @@
+{
+  "id": "airlines",
+  "displayName": "Airline",
+  "tagline": "Illustrative airline wording; no brand assets",
+  "source": "gallery wording pack; invented example names, not a customer",
+  "vocab": { "billing": "the crew-payroll API", "gateway": "the flight-operations MCP server", "goodAs": "the airline's real sign-in service", "evilAs": "a look-alike crew-portal sign-in", "assets": "crew and roster data" },
+  "cast": { "mark": { "name": "Mark", "role": "Dispatcher" }, "mary": { "name": "Mary", "role": "Operations analyst" } }
+}

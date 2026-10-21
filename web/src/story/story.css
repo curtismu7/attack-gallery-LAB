@@ -1,0 +1,16 @@
+.story { margin: 1rem 0; padding: .9rem 1.1rem; border: 1px solid var(--border); border-left: 5px solid var(--accent); border-radius: 10px; background: var(--surface); }
+.story__title { margin: .15rem 0 0; font-size: 1.15rem; }
+.story__controls { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; margin: .6rem 0; }
+.story__summary { display: grid; grid-template-columns: auto 1fr; gap: .25rem .75rem; margin: .5rem 0; font-size: .9rem; }
+.story__summary dt { font-weight: 600; color: var(--muted); }
+.story__summary dd { margin: 0; }
+.story__steps { list-style: none; margin: .5rem 0; padding: 0; display: grid; gap: .25rem; }
+.story__step { display: flex; align-items: center; gap: .5rem; width: 100%; text-align: left; font: inherit; padding: .5rem .6rem; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--text); cursor: pointer; min-height: 2.75rem; }
+.is-current > .story__step { border-color: var(--accent); font-weight: 600; }
+.story__n { display: inline-grid; place-items: center; min-width: 1.6rem; height: 1.6rem; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: .8rem; flex: none; }
+.story__tag { margin-left: auto; padding: .05rem .5rem; border-radius: 999px; border: 1px solid var(--warn); color: var(--warn); font-size: .75rem; font-weight: 600; }
+.story__body { margin: .4rem 0 .4rem 2rem; font-size: .92rem; }
+.story__body p { margin: .3rem 0; }
+.story__say { padding: .4rem .7rem; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
+.story__proof { margin: .5rem 0 0; font-size: .9rem; }
+.story__takeaway { margin: .4rem 0 0; font-weight: 600; }

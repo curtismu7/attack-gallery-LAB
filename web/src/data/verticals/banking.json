@@ -1,0 +1,8 @@
+{
+  "id": "banking",
+  "displayName": "Banking",
+  "tagline": "Illustrative banking wording; no brand assets",
+  "source": "gallery wording pack; invented example names, not a customer",
+  "vocab": { "billing": "the statements API", "gateway": "the accounts MCP server", "goodAs": "the bank's real sign-in service", "evilAs": "a look-alike banking sign-in", "assets": "account balances" },
+  "cast": { "mark": { "name": "Mark", "role": "Retail customer with an AI assistant" }, "mary": { "name": "Mary", "role": "Another customer of the bank" } }
+}
