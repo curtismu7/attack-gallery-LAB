@@ -31,9 +31,19 @@ describe('shell', () => {
     } finally { globalThis.fetch = real; }
   });
   it('shows no hosted-mock banner when mode is absent', async () => {
-    render(<App />);
-    expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
-    expect(screen.queryByTestId('mock-only-banner')).toBeNull();
+    const real = globalThis.fetch; let settled;
+    const healthSettled = new Promise((r) => { settled = r; });
+    globalThis.fetch = (url, init) => {
+      const p = real(url, init);
+      if (url === '/api/health') p.then(() => setTimeout(settled, 0), () => setTimeout(settled, 0));
+      return p;
+    };
+    try {
+      render(<App />);
+      expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
+      await healthSettled; // the banner decision is made only after /api/health resolves
+      expect(screen.queryByTestId('mock-only-banner')).toBeNull();
+    } finally { globalThis.fetch = real; }
   });
   it('the skip link moves focus to the main region', async () => {
     render(<App />); await screen.findByRole('heading', { name: 'Attack gallery' });
