@@ -16,7 +16,8 @@ test('docs/shelf-entry.json is a valid shelf registry entry for D33 on port 5181
   assert.equal(d.catalogId, 'D33');
   assert.equal(d.url, 'http://localhost:5181');
   assert.equal(d.healthPath, '/api/health');
-  assert.ok(d.composeFile.startsWith('/') && d.composeFile.endsWith('docker-compose.yml'));
+  assert.ok(d.composeFile.endsWith('docker-compose.yml'));
+  assert.ok(!d.composeFile.includes('/Users/') && !d.composeFile.startsWith('/'), 'composeFile must be a placeholder, not a machine-specific absolute path');
 });
 
 test('docs/family.md names every attack and every control, and every sibling demo by its shelf port', async () => {

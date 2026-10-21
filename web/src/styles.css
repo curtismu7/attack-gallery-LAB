@@ -111,4 +111,4 @@ details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-h
 .hopnum { position: absolute; width: max-content; min-width: 1.5rem; height: 1.5rem; padding: 0 .3rem; display: grid; place-items: center; border-radius: 999px; background: var(--surface); color: var(--text); border: 2px solid var(--edge); font-size: .8rem; font-weight: 700; pointer-events: none; }
 .hopnum--on { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
 .hopnum--stop { border-color: var(--bad); background: var(--bad); color: var(--bg); }
-.dctrl { white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }
+.dctrl { box-sizing: border-box; width: 100%; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }

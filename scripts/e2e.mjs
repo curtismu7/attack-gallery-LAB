@@ -103,6 +103,20 @@ try {
   check((await page.getByTestId('hopnum-3').getAttribute('class')).includes('hopnum--stop') && (await page.getByTestId('hopnum-1').getAttribute('class')).includes('hopnum--on'), 'diagram: hop badges light up and the stopping hop turns red');
   await shot('diagram-governed');
   await page.getByRole('button', { name: 'Reset' }).click(); check((await page.getByTestId('diagram-outcome').count()) === 0, 'diagram: Reset clears the run');
+  { const b2 = await node.boundingBox(); check(Math.abs(b2.x - b0.x) < 2 && Math.abs(b2.y - b0.y) < 2, 'diagram: Reset restores the dragged box to its starting position'); }
+  { // control-point chips: no overlap, no truncation (nowrap text fits its chip)
+    const chips = await page.locator('[data-testid^="ctrl-"].dctrl').evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { id: e.dataset.testid, x: r.x, y: r.y, w: r.width, h: r.height, clipped: e.scrollWidth > e.clientWidth + 1 }; }));
+    const overlap = []; for (let i = 0; i < chips.length; i++) for (let j = i + 1; j < chips.length; j++) { const a = chips[i], c = chips[j]; if (a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h) overlap.push(`${a.id}/${c.id}`); }
+    check(chips.length === 10 && overlap.length === 0 && chips.every((c) => !c.clipped), `diagram: ten control chips, none overlap or truncate ${overlap.join(',')}`);
+  }
+  // governed SSRF: the real run attempts and refuses hops 2-4
+  await page.getByLabel('Attack').selectOption('ssrf-metadata');
+  await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
+  await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 10000 });
+  { const cls = await Promise.all([1, 2, 3, 4].map((n) => page.getByTestId(`hopnum-${n}`).getAttribute('class')));
+    check(!cls[0].includes('hopnum--stop') && cls.slice(1).every((c) => c.includes('hopnum--stop')), 'diagram: governed ssrf-metadata refuses hops 2, 3 and 4'); }
+  await page.getByLabel('Attack').selectOption('issuer-mixup');
+  await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   await page.getByRole('button', { name: 'Ungoverned' }).click(); await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 8000 });
   check((await page.getByTestId('diagram-outcome').innerText()).includes('Attacker gained'), 'diagram: ungoverned simulation ends with the gain'); await shot('diagram-ungoverned');

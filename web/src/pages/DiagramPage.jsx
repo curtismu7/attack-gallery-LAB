@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Background, BaseEdge, Controls, ConnectionMode, EdgeLabelRenderer, Handle, MarkerType, Position, ReactFlow, getBezierPath } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { getCatalog, runAttack } from '../api.js';
-import { CONTROL_HOST, HOPS, NODES, hopsToRun } from '../data/diagram.js';
+import { CHIP_W, CONTROL_HOST, HOPS, NODES, chipPosition, hopTrace, hopsToRun } from '../data/diagram.js';
 import { Loading, useLoad } from '../components/bits.jsx';
 
 // ReactFlow diagram: movable boxes, Simulate, Reset, speed. The hops follow the selected attack; the outcome comes from a real run.
@@ -49,8 +49,10 @@ function wire(hops) {
   const used = {}; const take = (node, side) => { const k = node + side; used[k] = (used[k] ?? -1) + 1; return `${side}${used[k] % 3}`; };
   return hops.map((h) => { const [s, t] = sideFor(h.from, h.to); return { sourceHandle: take(h.from, s), targetHandle: take(h.to, t) }; });
 }
-const initialControlNodes = (controls) => controls.map((c, i) => ({ id: `ctrl-${c.id}`, type: 'ctrl', position: { x: (i % 5) * 200, y: 680 + Math.floor(i / 5) * 70 }, data: { id: c.id, title: c.id }, draggable: true }));
+const initialControlNodes = (controls) => controls.map((c, i) => ({ id: `ctrl-${c.id}`, type: 'ctrl', position: chipPosition(i), style: { width: CHIP_W }, data: { id: c.id, title: c.id }, draggable: true }));
 const initialNodes = (controls) => [...NODES.map((n) => ({ id: n.id, type: 'party', position: { x: n.x, y: n.y }, data: { title: n.title, sub: n.sub, kind: n.kind } })), ...initialControlNodes(controls)];
+
+const initialPositions = (controls) => Object.fromEntries(initialNodes(controls).map((n) => [n.id, n.position]));
 
 export default function DiagramPage({ controls }) {
   const cat = useLoad(getCatalog);
@@ -60,7 +62,7 @@ export default function DiagramPage({ controls }) {
   const [step, setStep] = useState(0);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
-  const [pos, setPos] = useState(() => Object.fromEntries(initialNodes(controls).map((n) => [n.id, n.position])));
+  const [pos, setPos] = useState(() => initialPositions(controls));
   const timer = useRef(null);
   const attack = cat.data?.attacks.find((a) => a.id === attackId);
   const hops = HOPS[attackId] || [];
@@ -80,7 +82,7 @@ export default function DiagramPage({ controls }) {
   }, [playing, step, total, speed]);
 
   const simulate = () => { if (!run) return; if (step >= total) setStep(0); setPlaying(true); };
-  const reset = () => { setPlaying(false); setStep(0); };
+  const reset = () => { setPlaying(false); setStep(0); setPos(initialPositions(controls)); }; // simulation and layout both go back
   const done = step >= total && step > 0;
   const stopped = done && run && !run.succeeded;
 
@@ -94,14 +96,14 @@ export default function DiagramPage({ controls }) {
     const w = wire(hops);
     const flow = hops.map((h, i) => {
       const lit = i < step; const cur = i === step - 1;
-      const blocked = stopped && i === step - 1 && h.ctrl === attack?.control;
+      const blocked = h.step ? lit && hopTrace(run, h)?.verdict === 'refused' : stopped && i === step - 1 && h.ctrl === attack?.control;
       const color = blocked ? 'var(--bad)' : lit ? 'var(--accent)' : 'var(--edge)';
       return { id: `h${i}`, source: h.from, target: h.to, ...w[i], type: 'hop', animated: cur && playing, data: { num: i + 1, lit, blocked },
         style: { stroke: color, strokeWidth: lit ? 3 : 1.5, opacity: lit || step === 0 ? 1 : 0.45 }, markerEnd: { type: MarkerType.ArrowClosed, color } };
     });
     const host = attack && { id: 'ctrl-edge', source: `ctrl-${attack.control}`, target: CONTROL_HOST[attack.control], sourceHandle: 't0', targetHandle: 'b0', style: { stroke: 'var(--ok)', strokeDasharray: '5 4' }, type: 'hop' };
     return host ? [...flow, host] : flow;
-  }, [hops, step, playing, attack, stopped]);
+  }, [hops, step, playing, attack, stopped, run]);
 
   const onNodesChange = (changes) => setPos((p) => ({ ...p, ...Object.fromEntries(changes.filter((c) => c.type === 'position' && c.position).map((c) => [c.id, c.position])) }));
 

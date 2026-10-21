@@ -23,3 +23,5 @@ Inside the container the server must listen on all interfaces, so the image sets
 - The compose publish rule is checked by a file parse and by a live check (a request to the host's LAN address was refused); it is not checked on every CI run against a real engine.
 - A browser extension or proxy on your machine can see what the page shows. Nothing sensitive is shown.
 - Nothing here proves a vendor product is safe. See `docs/controls.md`, the section Limits that apply to every control.
+- `server/src/ipguard.js` is a hand-rolled address parser and classifier. The MCP security guidance prefers a vetted library for this, and a real client should use one. It is here to make the mock's decisions visible and testable, not as a model to copy.
+- The mock network does not filter ports: the SSRF guard classifies the address only, and a public address on any port is allowed. The UI must not imply port restrictions, and none of its text does.

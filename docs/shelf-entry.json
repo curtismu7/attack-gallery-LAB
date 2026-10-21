@@ -8,9 +8,9 @@
       "description": "Ten named attacks, including MCP authorization attacks, each run ungoverned and governed against an in-process mock stack: see what the attacker gets, then the control that refuses it.",
       "url": "http://localhost:5181",
       "healthPath": "/api/health",
-      "composeFile": "/Users/cmuir/Development/attack-gallery/docker-compose.yml",
+      "composeFile": "<path-to-this-checkout>/docker-compose.yml",
       "composeOverlays": [],
-      "notes": "Host-run: npm start (port 5181). Or: docker compose up --build -d (publishes 127.0.0.1:5181 only). Edit composeFile to this checkout's absolute path."
+      "notes": "Host-run: npm start (port 5181). Or: docker compose up --build -d (publishes 127.0.0.1:5181 only). Replace the <path-to-this-checkout> placeholder in composeFile with this checkout's absolute path."
     }
   ]
 }

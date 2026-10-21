@@ -62,7 +62,7 @@ The compose file publishes `127.0.0.1` only (`scripts/compose.test.mjs` pins it)
 
 ### Shelf
 
-`docs/shelf-entry.json` is a registry entry for the demo shelf (D33, port 5181). Copy it into the shelf's `.data/demos.local.json` (edit `composeFile` to your checkout path). With the gallery running, the shelf shows it as Ready.
+`docs/shelf-entry.json` is a registry entry for the demo shelf (D33, port 5181). Copy it into the shelf's `.data/demos.local.json` (replace the `<path-to-this-checkout>` placeholder in `composeFile` with your checkout path). With the gallery running, the shelf shows it as Ready.
 
 ### Learning Hub
 

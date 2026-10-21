@@ -5,6 +5,7 @@ import App from '../App.jsx';
 import { Trail, Outcome } from '../components/RunPanel.jsx';
 import { startApi } from './helpers.js';
 import { ATTACKS } from '../../../server/src/catalog.js';
+import { CHIP_COLS, CHIP_W, HOPS, chipPosition, hopsToRun } from '../data/diagram.js';
 
 let api;
 beforeAll(() => { api = startApi(); });
@@ -133,12 +134,42 @@ describe('diagram', () => {
     expect(screen.getAllByText(/does not happen: stopped earlier/).length).toBe(3);
     fireEvent.click(screen.getByRole('button', { name: 'Reset' })); expect(screen.queryByTestId('diagram-outcome')).toBeNull();
   });
+  it('the governed SSRF simulation runs hops 2-4 and refuses each, like the real run', async () => {
+    go('#/diagram'); await screen.findByTestId('hops');
+    fireEvent.change(screen.getByLabelText('Attack'), { target: { value: 'ssrf-metadata' } });
+    fireEvent.change(screen.getByLabelText('Speed'), { target: { value: '4' } });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Simulate' })).toBeEnabled());
+    fireEvent.click(screen.getByRole('button', { name: 'Simulate' }));
+    await screen.findByTestId('diagram-outcome', {}, { timeout: 6000 });
+    const items = [...screen.getByTestId('hops').children]; expect(items).toHaveLength(5);
+    expect(items.slice(0, 4).every((li) => li.className.includes('hops__on'))).toBe(true); // hops 1-4 happen (2-4 refused; e2e checks the red badges)
+    expect(items[4]).toHaveClass('hops__skip');
+    expect(screen.queryAllByText(/does not happen/).length).toBe(1);
+  });
   it('the ungoverned simulation ends with the attacker gain', async () => {
     go('#/diagram'); await screen.findByTestId('hops');
     fireEvent.click(screen.getByRole('button', { name: 'Ungoverned' })); fireEvent.change(screen.getByLabelText('Speed'), { target: { value: '4' } });
     await waitFor(() => expect(screen.getByRole('button', { name: 'Simulate' })).toBeEnabled());
     fireEvent.click(screen.getByRole('button', { name: 'Simulate' }));
     expect(await screen.findByTestId('diagram-outcome', {}, { timeout: 4000 })).toHaveTextContent(/Attacker gained/);
+  });
+});
+
+describe('diagram data', () => {
+  it('hopsToRun for ssrf-metadata follows the real trace in both modes', async () => {
+    const run = async (mode) => (await (await fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ attackId: 'ssrf-metadata', mode }) })).json()).runs[0];
+    const gov = await run('governed'); const un = await run('ungoverned');
+    const stepIds = HOPS['ssrf-metadata'].filter((h) => h.step).map((h) => h.step);
+    expect(gov.trace.map((t) => t.step)).toEqual(stepIds); // the real governed run attempts every fetch...
+    expect(gov.trace.filter((t) => t.verdict === 'refused').map((t) => t.step)).toEqual(['link-local', 'loopback-name', 'redirect']); // ...and refuses each
+    expect(hopsToRun('ssrf-metadata', gov, 'ssrf_guard')).toBe(4);
+    expect(hopsToRun('ssrf-metadata', un, 'ssrf_guard')).toBe(5);
+  });
+  it('control chips never overlap: horizontal pitch exceeds the chip width, vertical pitch exceeds a line', () => {
+    const a = chipPosition(0); const b = chipPosition(1); const c = chipPosition(CHIP_COLS);
+    expect(b.x - a.x).toBeGreaterThan(CHIP_W); expect(c.y - a.y).toBeGreaterThanOrEqual(40);
+    // the longest name plus the stopped suffix at 12px monospace (~7.3px/char) plus padding fits the chip
+    const longest = Math.max(...ATTACKS.map((x) => x.control.length)); expect((longest + '■  (stopped it)'.length) * 7.3 + 24).toBeLessThanOrEqual(CHIP_W);
   });
 });
 
