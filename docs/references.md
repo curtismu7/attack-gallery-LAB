@@ -30,3 +30,9 @@ Rule for this repo: a spec section or product behaviour is cited only if the pag
 ## Scope boundaries
 
 D33 (this app) owns multi-step attacks. C23 owns token-shape errors (a single wrong token), D13 explains denials, D6 and D7 are hostile servers and agents, C22 is the stolen-token lab (bearer vs DPoP). None of those is rebuilt here.
+
+## Step GA2 additions
+
+- 2026-10-21 (GA2): https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices was fetched and read again in full. It confirms the GA0 reading above: Confused Deputy (per-client consent registry checked before the third-party flow), Token Passthrough ("MUST NOT accept any tokens that were not explicitly issued for the MCP server"), SSRF (HTTPS, block private and reserved ranges, validate redirect targets, consider egress proxies and DNS pinning), plus sections the gallery does not use (session hijacking, local server compromise, authorization URL validation, stdio proxy, scope minimization). Status in `content-pack.json`: `verified`.
+- The other five pages in the table at the top keep the status `read` in `content-pack.json`: they were fetched and read in GA0, not again in GA2.
+- Only these six URLs appear in `content-pack.json` sources (`scripts/content-pack.test.mjs` checks that each is recorded in this file).

@@ -1,0 +1,294 @@
+{
+  "schema": "demo-content-pack/1",
+  "id": "attack-gallery",
+  "title": "Agent attack gallery",
+  "version": "0.1.0",
+  "demo": {
+    "id": "attack-gallery",
+    "name": "Agent attack gallery",
+    "catalog": "D33",
+    "baseUrl": "http://localhost:5181",
+    "doctor": "/api/health",
+    "tags": [
+      "mcp",
+      "authorization",
+      "attacks",
+      "mix-up",
+      "ssrf",
+      "audience"
+    ]
+  },
+  "glossary": [
+    {
+      "id": "actor-injection",
+      "term": "Actor injection (act claim)",
+      "definition": "Making a call look as if a different agent made it. In the gallery a rogue agent holds a token whose signed act claim names the rogue, while the caller sends a header naming a trusted agent. The control reads the actor from the signed claim only and ignores the header.",
+      "aliases": [
+        "act claim",
+        "rogue actor"
+      ]
+    },
+    {
+      "id": "audience-binding",
+      "term": "Audience binding",
+      "definition": "A server accepts a token only if the aud claim names that server. A genuine token issued for another resource is refused, so tokens cannot be taken to a different service.",
+      "aliases": [
+        "aud check"
+      ]
+    },
+    {
+      "id": "confused-deputy",
+      "term": "Confused deputy",
+      "definition": "A trusted party is tricked into using its authority for someone else. In the gallery an MCP proxy with one static client ID at a third-party authorization server lets an attacker's dynamically registered client ride on the consent the user gave earlier.",
+      "aliases": [
+        "confused deputy problem"
+      ]
+    },
+    {
+      "id": "dynamic-client-registration",
+      "term": "Dynamic client registration",
+      "definition": "A client registers itself with a server and receives its own client_id and redirect URI. Open registration lets anyone register a client, which is why the proxy must still ask the user for consent per client.",
+      "aliases": [
+        "DCR"
+      ]
+    },
+    {
+      "id": "issuer-identification",
+      "term": "Issuer identification (iss)",
+      "definition": "The authorization response carries an iss parameter naming the server that answered. The client compares it, as a simple string, with the issuer of the server it sent the request to, and stops on a mismatch.",
+      "aliases": [
+        "iss parameter",
+        "RFC 9207"
+      ]
+    },
+    {
+      "id": "mix-up-attack",
+      "term": "Mix-up attack",
+      "definition": "A client that talks to more than one authorization server is steered to send a code meant for the good server to the evil one. The iss check on the authorization response is the named control.",
+      "aliases": [
+        "issuer mix-up",
+        "AS mix-up"
+      ]
+    },
+    {
+      "id": "object-level-authorization",
+      "term": "Object-level authorization",
+      "definition": "Checking that the specific object requested (an account id, for example) belongs to the user in the token. A valid token with the right scope is not permission to read any object.",
+      "aliases": [
+        "BOLA",
+        "per-user ownership check"
+      ]
+    },
+    {
+      "id": "resource-indicator",
+      "term": "Resource indicator",
+      "definition": "The resource parameter (RFC 8707) names the server a token is for, so the authorization server can restrict the token to it, usually through aud. The MCP authorization page requires clients to send it.",
+      "aliases": [
+        "RFC 8707",
+        "resource parameter"
+      ]
+    },
+    {
+      "id": "ssrf",
+      "term": "SSRF (server-side request forgery)",
+      "definition": "A hostile server supplies a metadata URL that points at an internal or link-local address, a name that resolves to loopback, or a redirect to a private range, hoping the client fetches it. The governed client refuses non-public targets. The gallery uses a fake network, so no real internal address is ever contacted.",
+      "aliases": [
+        "server-side request forgery",
+        "metadata SSRF"
+      ]
+    },
+    {
+      "id": "token-passthrough",
+      "term": "Token passthrough",
+      "definition": "An MCP server accepts a token not issued for it, or forwards the token it received to a downstream API. The MCP security page says servers MUST NOT accept tokens not explicitly issued for them. The control is to exchange the token for a separate one with its own audience.",
+      "aliases": [
+        "raw token forwarding"
+      ]
+    }
+  ],
+  "sources": [
+    {
+      "id": "mcp-authorization",
+      "title": "MCP Authorization (2025-11-25)",
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization",
+      "kind": "spec",
+      "use": "Resource parameter, token handling, access token privilege restriction, insufficient scope",
+      "status": "read",
+      "checked": "2026-10-21"
+    },
+    {
+      "id": "mcp-security-best-practices",
+      "title": "MCP Security Best Practices (2025-11-25)",
+      "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices",
+      "kind": "spec",
+      "use": "Confused deputy, token passthrough, SSRF, scope minimization",
+      "status": "verified",
+      "checked": "2026-10-21"
+    },
+    {
+      "id": "rfc8693",
+      "title": "RFC 8693: OAuth 2.0 Token Exchange",
+      "url": "https://www.rfc-editor.org/rfc/rfc8693.html",
+      "kind": "spec",
+      "use": "act claim (section 4.1); impersonation text not read",
+      "status": "read",
+      "checked": "2026-10-21"
+    },
+    {
+      "id": "rfc8707",
+      "title": "RFC 8707: Resource Indicators for OAuth 2.0",
+      "url": "https://www.rfc-editor.org/rfc/rfc8707.html",
+      "kind": "spec",
+      "use": "resource parameter and audience restriction",
+      "status": "read",
+      "checked": "2026-10-21"
+    },
+    {
+      "id": "rfc9207",
+      "title": "RFC 9207: OAuth 2.0 Authorization Server Issuer Identification",
+      "url": "https://www.rfc-editor.org/rfc/rfc9207.html",
+      "kind": "spec",
+      "use": "iss response parameter and the mix-up attack",
+      "status": "read",
+      "checked": "2026-10-21"
+    },
+    {
+      "id": "rfc9728",
+      "title": "RFC 9728: OAuth 2.0 Protected Resource Metadata",
+      "url": "https://www.rfc-editor.org/rfc/rfc9728.html",
+      "kind": "spec",
+      "use": "Audience-restricted tokens (7.4) and SSRF precautions on metadata fetches (7.7)",
+      "status": "read",
+      "checked": "2026-10-21"
+    }
+  ],
+  "cards": [
+    {
+      "id": "compare",
+      "label": "Compare matrix",
+      "description": "Attacks against controls: with one control off, only its own attack succeeds.",
+      "group": "try-it",
+      "terms": [
+        "audience-binding"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/compare"
+      }
+    },
+    {
+      "id": "confused-deputy-dcr",
+      "label": "Confused deputy via static client and DCR",
+      "description": "Why a proxy needs per-client consent.",
+      "group": "try-it",
+      "terms": [
+        "confused-deputy",
+        "dynamic-client-registration"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/attack/confused-deputy-dcr"
+      }
+    },
+    {
+      "id": "controls",
+      "label": "Controls",
+      "description": "The ten named controls, the error each returns and the attack each stops.",
+      "group": "concept",
+      "action": {
+        "type": "route",
+        "href": "/#/controls"
+      }
+    },
+    {
+      "id": "gallery",
+      "label": "Attack gallery",
+      "description": "Ten named attacks, each run ungoverned and governed.",
+      "group": "try-it",
+      "terms": [
+        "actor-injection",
+        "object-level-authorization",
+        "token-passthrough"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/gallery"
+      }
+    },
+    {
+      "id": "limits",
+      "label": "Honest limits",
+      "description": "What the gallery does not claim, and which citations are UNVERIFIED.",
+      "group": "reference",
+      "action": {
+        "type": "route",
+        "href": "/#/limits"
+      }
+    },
+    {
+      "id": "ssrf-metadata",
+      "label": "SSRF via metadata",
+      "description": "A hostile server points metadata URLs at internal names; the governed client refuses them. Fake network only.",
+      "group": "try-it",
+      "terms": [
+        "ssrf"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/attack/ssrf-metadata"
+      }
+    },
+    {
+      "id": "story-token-elsewhere",
+      "label": "Story: the agent used my token somewhere else",
+      "description": "Audience confusion: a genuine token for one resource presented at another.",
+      "group": "try-it",
+      "terms": [
+        "audience-binding",
+        "resource-indicator",
+        "token-passthrough"
+      ],
+      "story": "S01",
+      "action": {
+        "type": "route",
+        "href": "/#/stories"
+      }
+    },
+    {
+      "id": "story-which-as",
+      "label": "Story: which authorization server is this?",
+      "description": "Issuer mix-up: the client must read iss and compare it with the server it asked.",
+      "group": "try-it",
+      "terms": [
+        "mix-up-attack",
+        "issuer-identification"
+      ],
+      "story": "S02",
+      "action": {
+        "type": "route",
+        "href": "/#/stories"
+      }
+    }
+  ],
+  "diagrams": [
+    {
+      "id": "attack-path",
+      "label": "Parties and control points for the selected attack",
+      "href": "/#/diagram"
+    }
+  ],
+  "stories": [
+    {
+      "id": "S01",
+      "title": "The agent used my token somewhere else",
+      "say": "A good token for one place must be worthless at every other place.",
+      "file": "web/src/data/stories/G1-token-used-somewhere-else.json"
+    },
+    {
+      "id": "S02",
+      "title": "Which authorization server is this?",
+      "say": "The client has to ask the response which server it came from, and reject the wrong answer.",
+      "file": "web/src/data/stories/G2-which-authorization-server.json"
+    }
+  ]
+}

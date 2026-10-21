@@ -1,0 +1,22 @@
+# OrbStack:  HOST_PORT=5181 docker compose up --build -d   ->  http://127.0.0.1:5181
+# The server binds 0.0.0.0 INSIDE the container (GALLERY_BIND is the opt-in), but the port is published on loopback only.
+# Do not change the 127.0.0.1 below. Pinned by scripts/compose.test.mjs.
+name: attack-gallery
+
+services:
+  attack-gallery:
+    build: .
+    ports:
+      - "127.0.0.1:${HOST_PORT:-5181}:5181"
+    environment:
+      GALLERY_PORT: "5181"
+      GALLERY_HOST: 0.0.0.0
+      GALLERY_BIND: "1"
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5181/api/health').then(r=>r.json()).then(j=>process.exit(j.state==='ready'?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
