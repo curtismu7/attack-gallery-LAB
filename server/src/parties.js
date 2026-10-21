@@ -1,6 +1,6 @@
 // The mock parties. All in-process; none opens a socket. Tokens are fake JWTs signed with keys generated at startup.
 import { createHash, randomUUID } from 'node:crypto';
-import { createIssuer, verifyAccessToken, tokenId } from './keys.js';
+import { createIssuer, verifyAccessToken, tokenId, generateEcKeyPair } from './keys.js';
 import { FakeNet } from './net.js';
 import { guardedFetch, rawFetch } from './ssrf.js';
 import { URLS, USERS, CLIENTS, ALLOWED_CLIENTS, ALLOWED_ACTORS, TOOLS, freshAccounts } from './world.js';
@@ -60,8 +60,8 @@ export function createEvilAs(keys, good) {
     redeemStolen: () => good.redeem(captured.at(-1) || {}),
     // A token that claims the good issuer but is signed with a key the good AS does not publish. Verification must fail.
     async forgeTokenClaimingGoodIssuer(claims) {
-      const { SignJWT, generateKeyPair } = await import('jose');
-      const { privateKey } = await generateKeyPair('ES256');
+      const { SignJWT } = await import('jose');
+      const { privateKey } = generateEcKeyPair('ES256');
       return new SignJWT({ ...claims }).setProtectedHeader({ alg: 'ES256', kid: keys.good.kid }).setIssuer(URLS.goodAs).setExpirationTime('5m').sign(privateKey);
     },
   };
