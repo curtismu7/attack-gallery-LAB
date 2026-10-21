@@ -22,6 +22,19 @@ describe('shell', () => {
     expect(screen.getByTestId('banner')).toHaveTextContent(/mocks/i); expect(screen.getByTestId('banner')).toHaveTextContent(/nothing leaves this machine/i);
     expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
   });
+  it('shows the hosted-mock banner only when health reports mock-only', async () => {
+    const real = globalThis.fetch;
+    globalThis.fetch = (url, init) => (url === '/api/health' ? Promise.resolve(new Response(JSON.stringify({ mode: 'mock-only' }))) : real(url, init));
+    try {
+      render(<App />);
+      expect(await screen.findByTestId('mock-only-banner')).toHaveTextContent('Hosted mock: sample data only, nothing leaves this server');
+    } finally { globalThis.fetch = real; }
+  });
+  it('shows no hosted-mock banner when mode is absent', async () => {
+    render(<App />);
+    expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
+    expect(screen.queryByTestId('mock-only-banner')).toBeNull();
+  });
   it('the skip link moves focus to the main region', async () => {
     render(<App />); await screen.findByRole('heading', { name: 'Attack gallery' });
     fireEvent.click(screen.getByText('Skip to content')); expect(document.activeElement).toBe(document.getElementById('main'));
