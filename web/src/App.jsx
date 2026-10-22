@@ -59,8 +59,9 @@ export default function App() {
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
         <div className="top__tools"><PresentToggle /><button type="button" className="btn" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
       </header>
-      <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>
-      {mockOnly && <div className="banner" role="note" data-testid="mock-only-banner">Hosted mock: sample data only, nothing leaves this server</div>}
+      {mockOnly
+        ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
+        : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
       <main id="main" tabIndex={-1} className="page">
         <Loading state={ctl}>{() => page()}</Loading>
       </main>
