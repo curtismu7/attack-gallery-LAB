@@ -60,6 +60,19 @@ docker compose down
 
 The compose file publishes `127.0.0.1` only (`scripts/compose.test.mjs` pins it). The image is Node 22, non-root, read-only filesystem, all capabilities dropped. `scripts/live-check.mjs` verifies a running instance, host or container, by content: health is `ready`, the page is served, each of the ten attacks run in both modes succeeds ungoverned and is refused by its named control governed, and everything returned passes the safety scan.
 
+### Hosting the mock
+
+A hosted copy (for example on a cluster) needs three explicit settings; none is on by default, and the local defaults stay loopback:
+
+```
+MOCK_ONLY=1          # refuses every write except POST /api/run with its three fields; health reports mode "mock-only"
+GALLERY_HOST=0.0.0.0 # bind beyond loopback (the Dockerfile and compose file already set this inside the container)
+GALLERY_BIND=1       # the deliberate opt-in without which any non-loopback GALLERY_HOST is refused
+GALLERY_PORT=5181
+```
+
+Readiness probe: `GET /api/health` (`demo-health/1`; `state` is `ready` once the background self-check passes). The gallery has no Host-header allow-list of its own, so restrict hostnames at the ingress. Do not bake a `.env` into an image or pass secrets in: the gallery needs none, and `.dockerignore` excludes `.env` on purpose. The image already runs as the non-root `node` user.
+
 ### Shelf
 
 `docs/shelf-entry.json` is a registry entry for the demo shelf (D33, port 5181). Copy it into the shelf's `.data/demos.local.json` (replace the `<path-to-this-checkout>` placeholder in `composeFile` with your checkout path). With the gallery running, the shelf shows it as Ready.

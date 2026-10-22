@@ -1,4 +1,5 @@
 const json = async (r) => { const j = await r.json().catch(() => ({})); if (!r.ok) throw new Error(j.message || j.error || `HTTP ${r.status}`); return j; };
+export const getHealth = () => fetch('/api/health').then(json);
 export const getCatalog = () => fetch('/api/catalog').then(json);
 export const getControls = () => fetch('/api/controls').then(json);
 export const getMatrix = () => fetch('/api/matrix').then(json);

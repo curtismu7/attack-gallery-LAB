@@ -6,18 +6,20 @@ import { CONTROLS, CONTROL_IDS, governed, governedExcept, ungoverned } from './p
 import { runAttack } from './runner.js';
 import { createKeyring } from './parties.js';
 import { createHealth } from './health.js';
+import { isMockOnly, mockOnlyGuard } from './mockonly.js';
 
 const MODES = ['ungoverned', 'governed', 'both'];
 const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected });
 
-export async function createApp() {
+export async function createApp({ mockOnly = isMockOnly() } = {}) {
   let keyring = await createKeyring();
   const app = express();
-  const health = createHealth();
+  const health = createHealth({ mockOnly });
   app.disable('x-powered-by');
   // Inert-text defence in depth: nothing from a response can run script, and the page may only talk to itself.
   app.use((req, res, next) => { res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"); next(); });
   app.use(express.json({ limit: '4kb' }));
+  if (mockOnly) app.use(mockOnlyGuard);
   app.use('/api/health', health.router);
 
   app.get('/api/catalog', (req, res) => res.json({ packs: [{ id: 1, name: 'Pack 1: token and identity attacks' }, { id: 2, name: 'Pack 2: MCP authorization attacks' }], attacks: ATTACKS.map(publicAttack) }));

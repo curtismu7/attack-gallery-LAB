@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getControls } from './api.js';
+import { getControls, getHealth } from './api.js';
 import { Loading, useLoad } from './components/bits.jsx';
 import { PresentBar, PresentProvider, PresentToggle } from './present/PresentMode.jsx';
 import GalleryPage from './pages/GalleryPage.jsx';
@@ -32,6 +32,8 @@ export default function App() {
   const { name, arg } = useRoute();
   const [dark, flip] = useTheme();
   const ctl = useLoad(getControls);
+  const [mockOnly, setMockOnly] = useState(false);
+  useEffect(() => { getHealth().then((h) => setMockOnly(h.mode === 'mock-only')).catch(() => {}); }, []);
   const first = useRef(true);
   // On a route change (not the first load) move focus to main so keyboard and screen reader users land on the new page.
   useEffect(() => { document.title = 'Agent Attack Gallery'; if (first.current) { first.current = false; return; } document.getElementById('main')?.focus?.({ preventScroll: true }); window.scrollTo?.(0, 0); }, [name, arg]);
@@ -58,6 +60,7 @@ export default function App() {
         <div className="top__tools"><PresentToggle /><button type="button" className="btn" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
       </header>
       <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>
+      {mockOnly && <div className="banner" role="note" data-testid="mock-only-banner">Hosted mock: sample data only, nothing leaves this server</div>}
       <main id="main" tabIndex={-1} className="page">
         <Loading state={ctl}>{() => page()}</Loading>
       </main>
