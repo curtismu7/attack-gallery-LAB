@@ -27,7 +27,8 @@ describe('shell', () => {
     globalThis.fetch = (url, init) => (url === '/api/health' ? Promise.resolve(new Response(JSON.stringify({ mode: 'mock-only' }))) : real(url, init));
     try {
       render(<App />);
-      expect(await screen.findByTestId('mock-only-banner')).toHaveTextContent('Hosted mock: sample data only, nothing leaves this server');
+      expect(await screen.findByTestId('mock-only-banner')).toHaveTextContent('Hosted, simulated');
+      expect(screen.queryByTestId('banner')).toBeNull(); // the always-on 'this machine' banner is swapped out, not stacked
     } finally { globalThis.fetch = real; }
   });
   it('shows no hosted-mock banner when mode is absent', async () => {
