@@ -25,7 +25,7 @@ Product evidence: none; described as "a gateway control of this kind".
 
 **References.**
 
-- [MCP Authorization, Runtime Insufficient Scope Errors](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Servers SHOULD answer insufficient scope with HTTP 403 and WWW-Authenticate error="insufficient_scope" with the needed scope.
+- [MCP Authorization, Runtime Insufficient Scope Errors](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Servers SHOULD answer insufficient scope with HTTP 403 and WWW-Authenticate error="insufficient_scope" with the needed scope.
 - [MCP Security Best Practices, Scope Minimization](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices): Progressive least-privilege scopes; elevation via targeted WWW-Authenticate scope challenges.
 
 **What it does not stop.**
@@ -42,7 +42,7 @@ Product evidence: none; described as "a gateway control of this kind".
 **References.**
 
 - OWASP API Security, Broken Object Level Authorization: **UNVERIFIED** (Not fetched in this session.)
-- [MCP Authorization, Access Token Privilege Restriction](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Servers MUST only accept tokens intended for them, ensure no data is returned to unauthorized parties, and MUST NOT pass through the token received from the client to upstream APIs.
+- [MCP Authorization, Access Token Privilege Restriction](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Servers MUST only accept tokens intended for them, ensure no data is returned to unauthorized parties, and MUST NOT pass through the token received from the client to upstream APIs.
 
 **What it does not stop.**
 
@@ -57,8 +57,8 @@ Product evidence: none; described as "a gateway control of this kind".
 
 **References.**
 
-- [MCP Authorization, Client Registration Approaches](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Pre-registration, Client ID Metadata Documents and Dynamic Client Registration are the registration approaches (adjacent to a client allowlist, which the page does not name).
-- [MCP Authorization, Trust Policies (Client ID Metadata Document Security)](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Authorization servers MAY use domain allowlists for trusted clients.
+- [MCP Authorization, Client Registration Approaches](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Pre-registration, Client ID Metadata Documents and Dynamic Client Registration are the registration approaches (adjacent to a client allowlist, which the page does not name).
+- [MCP Authorization, Trust Policies (Client ID Metadata Document Security)](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Authorization servers MAY use domain allowlists for trusted clients.
 
 **What it does not stop.**
 
@@ -104,7 +104,7 @@ Product evidence: none; described as "a gateway control of this kind".
 **References.**
 
 - [RFC 8707 section 2](https://www.rfc-editor.org/rfc/rfc8707.html): The authorization server SHOULD restrict issued tokens to the named resources, typically via the aud claim.
-- [MCP Authorization, Token Handling](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Servers MUST validate that access tokens were issued specifically for them as the audience; invalid tokens get HTTP 401.
+- [MCP Authorization, Token Handling](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Servers MUST validate that access tokens were issued specifically for them as the audience; invalid tokens get HTTP 401.
 - [RFC 9728 section 7.4](https://www.rfc-editor.org/rfc/rfc9728.html): Clients working with several resource servers SHOULD request audience-restricted tokens via Resource Indicators.
 
 **What it does not stop.**
@@ -120,7 +120,7 @@ Product evidence: none; described as "a gateway control of this kind".
 
 **References.**
 
-- [MCP Authorization, Access Token Privilege Restriction](https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization): Servers MUST only accept tokens intended for them, ensure no data is returned to unauthorized parties, and MUST NOT pass through the token received from the client to upstream APIs.
+- [MCP Authorization, Access Token Privilege Restriction](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization): Servers MUST only accept tokens intended for them, ensure no data is returned to unauthorized parties, and MUST NOT pass through the token received from the client to upstream APIs.
 - [MCP Security Best Practices, Token Passthrough](https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices): MCP servers MUST NOT accept any tokens that were not explicitly issued for the MCP server.
 
 **What it does not stop.**
