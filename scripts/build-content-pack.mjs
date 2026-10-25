@@ -21,7 +21,7 @@ const STORY_IDS = { G1: 'S01', G2: 'S02' };
 const src = (id, title, url, use, status, checked) => ({ id, title, url, kind: 'spec', use, status, checked });
 const SOURCES = [
   src('mcp-security-best-practices', 'MCP Security Best Practices (2025-11-25)', 'https://modelcontextprotocol.io/specification/2025-11-25/basic/security_best_practices', 'Confused deputy, token passthrough, SSRF, scope minimization', 'verified', '2026-10-21'),
-  src('mcp-authorization', 'MCP Authorization (2025-11-25)', 'https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization', 'Resource parameter, token handling, access token privilege restriction, insufficient scope', 'read', '2026-10-21'),
+  src('mcp-authorization', 'MCP Authorization (2026-07-28)', 'https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization', 'Resource parameter, token handling, access token privilege restriction, insufficient scope', 'read', '2026-10-21'),
   src('rfc9207', 'RFC 9207: OAuth 2.0 Authorization Server Issuer Identification', 'https://www.rfc-editor.org/rfc/rfc9207.html', 'iss response parameter and the mix-up attack', 'read', '2026-10-21'),
   src('rfc8707', 'RFC 8707: Resource Indicators for OAuth 2.0', 'https://www.rfc-editor.org/rfc/rfc8707.html', 'resource parameter and audience restriction', 'read', '2026-10-21'),
   src('rfc8693', 'RFC 8693: OAuth 2.0 Token Exchange', 'https://www.rfc-editor.org/rfc/rfc8693.html', 'act claim (section 4.1); impersonation text not read', 'read', '2026-10-21'),
