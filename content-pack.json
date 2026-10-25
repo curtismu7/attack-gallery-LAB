@@ -109,8 +109,8 @@
   "sources": [
     {
       "id": "mcp-authorization",
-      "title": "MCP Authorization (2025-11-25)",
-      "url": "https://modelcontextprotocol.io/specification/2025-11-25/basic/authorization",
+      "title": "MCP Authorization (2026-07-28)",
+      "url": "https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization",
       "kind": "spec",
       "use": "Resource parameter, token handling, access token privilege restriction, insufficient scope",
       "status": "read",
