@@ -35,13 +35,23 @@ spec:
           env:
             - { name: MOCK_ONLY, value: "1" }
             - { name: GALLERY_PORT, value: "5181" }
+            - { name: GALLERY_ALLOWED_HOSTS, value: "__MOCK_HOST__" }
+          # The host guard answers 403 to any Host it does not know, including the kubelet's pod-IP Host, so probes send the real one.
           readinessProbe:
-            httpGet: { path: /api/health, port: http }
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - { name: Host, value: "__MOCK_HOST__" }
             initialDelaySeconds: 3
             periodSeconds: 15
             timeoutSeconds: 3
           livenessProbe:
-            httpGet: { path: /api/health, port: http }
+            httpGet:
+              path: /api/health
+              port: http
+              httpHeaders:
+                - { name: Host, value: "__MOCK_HOST__" }
             initialDelaySeconds: 10
             periodSeconds: 30
             timeoutSeconds: 3
