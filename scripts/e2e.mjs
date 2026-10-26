@@ -97,13 +97,16 @@ try {
   await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   const node = page.locator('.react-flow__node', { hasText: 'Evil AS' }); const b0 = await node.boundingBox();
   await page.mouse.move(b0.x + 20, b0.y + 20); await page.mouse.down(); await page.mouse.move(b0.x + 140, b0.y + 120, { steps: 8 }); await page.mouse.up();
-  const b1 = await node.boundingBox(); check(Math.abs(b1.x - b0.x) > 50, 'diagram: a box can be dragged');
+  await sleep(200); const b1 = await node.boundingBox(); check(Math.abs(b1.x - b0.x) > 50, 'diagram: a box can be dragged');
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 8000 });
   check((await page.getByTestId('diagram-outcome').innerText()).includes('iss_mismatch'), 'diagram: governed simulation stops at the iss check');
   check((await page.getByTestId('hopnum-3').getAttribute('class')).includes('hopnum--stop') && (await page.getByTestId('hopnum-1').getAttribute('class')).includes('hopnum--on'), 'diagram: hop badges light up and the stopping hop turns red');
   await shot('diagram-governed');
   await page.getByRole('button', { name: 'Reset' }).click(); check((await page.getByTestId('diagram-outcome').count()) === 0, 'diagram: Reset clears the run');
-  { const b2 = await node.boundingBox(); check(Math.abs(b2.x - b0.x) < 2 && Math.abs(b2.y - b0.y) < 2, 'diagram: Reset restores the dragged box to its starting position'); }
+  { // ReactFlow applies a controlled node position one render after the click (the transform is written from its own store), so a single read right after Reset can still see the dragged position. Poll until it settles.
+    let b2 = await node.boundingBox();
+    for (let i = 0; i < 40 && !(Math.abs(b2.x - b0.x) < 2 && Math.abs(b2.y - b0.y) < 2); i++) { await sleep(50); b2 = await node.boundingBox(); }
+    check(Math.abs(b2.x - b0.x) < 2 && Math.abs(b2.y - b0.y) < 2, 'diagram: Reset restores the dragged box to its starting position'); }
   { // control-point chips: no overlap, no truncation (nowrap text fits its chip)
     const chips = await page.locator('[data-testid^="ctrl-"].dctrl').evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { id: e.dataset.testid, x: r.x, y: r.y, w: r.width, h: r.height, clipped: e.scrollWidth > e.clientWidth + 1 }; }));
     const overlap = []; for (let i = 0; i < chips.length; i++) for (let j = i + 1; j < chips.length; j++) { const a = chips[i], c = chips[j]; if (a.x < c.x + c.w && c.x < a.x + a.w && a.y < c.y + c.h && c.y < a.y + a.h) overlap.push(`${a.id}/${c.id}`); }

@@ -6,21 +6,24 @@ import { CONTROLS, CONTROL_IDS, governed, governedExcept, ungoverned } from './p
 import { runAttack } from './runner.js';
 import { createKeyring } from './parties.js';
 import { createHealth } from './health.js';
-import { isMockOnly, mockOnlyGuard } from './mockonly.js';
+import { isMockOnly, mockOnlyGuard, createLimiter, limitsFromEnv, hostGuard } from './mockonly.js';
 
 const MODES = ['ungoverned', 'governed', 'both'];
 const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected });
 
-export async function createApp({ mockOnly = isMockOnly() } = {}) {
+export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], limits = limitsFromEnv() } = {}) {
   let keyring = await createKeyring();
   const app = express();
   const health = createHealth({ mockOnly });
   app.disable('x-powered-by');
+  if (allowedHosts.length) app.use(hostGuard(allowedHosts)); // before everything, health included
   // Inert-text defence in depth: nothing from a response can run script, and the page may only talk to itself.
   app.use((req, res, next) => { res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"); next(); });
   app.use(express.json({ limit: '4kb' }));
   if (mockOnly) app.use(mockOnlyGuard);
-  app.use('/api/health', health.router);
+  app.use('/api/health', health.router); // health is registered before the limiter and is never throttled
+  if (mockOnly) app.use(['/api/run', '/api/matrix'], createLimiter(limits));
+  let matrixCache; // mock-only: the matrix is deterministic and /api/reset is refused, so compute it once
 
   app.get('/api/catalog', (req, res) => res.json({ packs: [{ id: 1, name: 'Pack 1: token and identity attacks' }, { id: 2, name: 'Pack 2: MCP authorization attacks' }], attacks: ATTACKS.map(publicAttack) }));
   app.get('/api/controls', (req, res) => res.json({ controls: CONTROLS.map((c) => ({ id: c.id, name: c.name, does: c.does, error: c.error, status: c.status, message: c.message, references: c.refs, seed: c.seed, stops: ATTACKS.filter((a) => a.control === c.id).map((a) => a.id) })) }));
@@ -42,9 +45,14 @@ export async function createApp({ mockOnly = isMockOnly() } = {}) {
   // Attacks x controls: each attack run with every control on except one. succeeds = that one control was what stopped it.
   app.get('/api/matrix', async (req, res, next) => {
     try {
-      const cells = {};
-      for (const a of ATTACKS) { cells[a.id] = {}; for (const c of CONTROL_IDS) cells[a.id][c] = (await runAttack(a, governedExcept(c), keyring)).succeeded; }
-      res.json({ attacks: ATTACKS.map((a) => a.id), controls: CONTROL_IDS, cells });
+      const compute = async () => {
+        const cells = {};
+        for (const a of ATTACKS) { cells[a.id] = {}; for (const c of CONTROL_IDS) cells[a.id][c] = (await runAttack(a, governedExcept(c), keyring)).succeeded; }
+        return { attacks: ATTACKS.map((a) => a.id), controls: CONTROL_IDS, cells };
+      };
+      if (!mockOnly) return res.json(await compute());
+      matrixCache ??= compute().catch((e) => { matrixCache = undefined; throw e; });
+      res.json(await matrixCache);
     } catch (e) { next(e); }
   });
   app.post('/api/reset', async (req, res, next) => {
