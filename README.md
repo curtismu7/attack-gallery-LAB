@@ -69,9 +69,12 @@ MOCK_ONLY=1          # refuses every write except POST /api/run with its three f
 GALLERY_HOST=0.0.0.0 # bind beyond loopback (the Dockerfile and compose file already set this inside the container)
 GALLERY_BIND=1       # the deliberate opt-in without which any non-loopback GALLERY_HOST is refused
 GALLERY_PORT=5181
+GALLERY_ALLOWED_HOSTS=gallery.example   # comma-separated Host names (no port), exact match; anything else gets 403. REQUIRED with MOCK_ONLY on a non-loopback GALLERY_HOST (the server refuses to start without it)
 ```
 
-Readiness probe: `GET /api/health` (`demo-health/1`; `state` is `ready` once the background self-check passes). The gallery has no Host-header allow-list of its own, so restrict hostnames at the ingress. Do not bake a `.env` into an image or pass secrets in: the gallery needs none, and `.dockerignore` excludes `.env` on purpose. The image already runs as the non-root `node` user.
+Bounds, active only with `MOCK_ONLY`: `/api/run` and `/api/matrix` share a global in-flight cap (`GALLERY_MAX_INFLIGHT`, default 8; over it returns 503 with `Retry-After`) and a per-source token bucket (`GALLERY_RATE_BURST` default 20, `GALLERY_RATE_PER_SEC` default 5; empty bucket returns 429 with `Retry-After`). The source is the TCP peer. Behind an ingress every visitor then shares the ingress address, so set `GALLERY_TRUST_PROXY=1` only when a proxy you control appends the real client to `X-Forwarded-For`; the last entry is used and earlier ones are ignored. The matrix is deterministic, so it is computed once and cached. `/api/health` is never throttled.
+
+Readiness probe: `GET /api/health` (`demo-health/1`; `state` is `ready` once the background self-check passes). The Host allow-list applies to the probe too, so the kubelet probe must send an allowed name: in the Deployment use `httpGet: { path: /api/health, port: 5181, httpHeaders: [{ name: Host, value: gallery.example }] }`. A probe with the pod IP as Host gets 403. Do not bake a `.env` into an image or pass secrets in: the gallery needs none, and `.dockerignore` excludes `.env` on purpose. The image already runs as the non-root `node` user.
 
 ### Shelf
 
