@@ -112,3 +112,18 @@ details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-h
 .hopnum--on { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
 .hopnum--stop { border-color: var(--bad); background: var(--bad); color: var(--bg); }
 .dctrl { box-sizing: border-box; width: 100%; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; }
+
+.wire { margin: .6rem 0; padding: .3rem .9rem .9rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); min-width: 0; }
+.wire h3, .wire h4 { margin: .5rem 0 .25rem; }
+.wire__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
+.wire__msg { min-width: 0; }
+.wire__pre { margin: 0; }
+.wire__pre--ok { border-left: 4px solid var(--ok); } .wire__pre--bad { border-left: 4px solid var(--bad); }
+.wire__hl { background: var(--warn-soft); color: var(--text); outline: 1px solid var(--warn); border-radius: 3px; padding: 0 .1rem; cursor: help; }
+.wire__none { padding: .6rem .8rem; border: 1px dashed var(--border); border-radius: 6px; }
+.wire__jwt { margin: .3rem 0; padding: .6rem; background: var(--code-bg); border-radius: 6px; font: .8rem/1.5 ui-monospace, Menlo, monospace; overflow-wrap: anywhere; word-break: break-all; }
+.wire__p--h { background: var(--accent-soft); } .wire__p--p { background: var(--ok-soft); } .wire__p--s { background: var(--warn-soft); }
+.wire__table td, .wire__table th { vertical-align: top; }
+.wire__row--hot td { background: var(--warn-soft); }
+.wire__notice { margin: .8rem 0 0; padding: .6rem .8rem; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
+.wire__table td:first-child { white-space: nowrap; }
