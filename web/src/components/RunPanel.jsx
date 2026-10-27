@@ -1,5 +1,8 @@
 // One side of an attack: the numbered request/response trail, what the attacker gained, or the refusal.
 // Every string below comes from the API and is rendered as React text children (inert): nothing is ever parsed as HTML.
+import { useState } from 'react';
+import WirePanel from './WirePanel.jsx';
+
 const CLAIM_ORDER = ['iss', 'sub', 'aud', 'scope', 'azp', 'act', 'exp'];
 const show = (v) => (typeof v === 'object' ? JSON.stringify(v) : String(v));
 
@@ -15,7 +18,10 @@ export function Claims({ token }) {
 const pretty = (o) => JSON.stringify(o, null, 2);
 const VERDICT = { ok: 'accepted', refused: 'refused', info: 'info' };
 
-export function Trail({ trace }) {
+// attack (optional): with it, each step gets an "On the wire" button that opens the request, response and decoded token.
+export function Trail({ trace, attack }) {
+  const [open, setOpen] = useState(() => new Set());
+  const toggle = (n) => setOpen((o) => { const x = new Set(o); if (!x.delete(n)) x.add(n); return x; });
   return (
     <ol className="trail">
       {trace.map((t) => {
@@ -29,6 +35,10 @@ export function Trail({ trace }) {
               <summary>Request and response (redacted)</summary>
               <pre className="code">{pretty({ request: { ...t.request, token: undefined }, response: { ...t.response, token: undefined } })}</pre>
             </details>
+            {attack && (<>
+              <button type="button" className="btn" aria-expanded={open.has(t.n)} onClick={() => toggle(t.n)} data-testid={`wire-btn-${t.n}`}>{open.has(t.n) ? 'Hide' : 'Show'} on the wire</button>
+              {open.has(t.n) && <WirePanel attack={attack} entry={t} />}
+            </>)}
           </li>
         );
       })}

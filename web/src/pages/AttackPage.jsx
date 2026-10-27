@@ -5,12 +5,12 @@ import { Outcome, Trail } from '../components/RunPanel.jsx';
 import StoryPanel from '../story/StoryPanel.jsx';
 import { storyForAttack } from '../story/stories.js';
 
-function Side({ title, run, control, controls, children, id }) {
+function Side({ title, run, control, controls, children, id, attack }) {
   return (
     <section className="side" aria-labelledby={id} data-testid={`side-${id}`}>
       <h3 id={id}>{title}</h3>
       {children}
-      {run ? (<><Outcome run={run} control={control} controls={controls} /><h4>Trail</h4><Trail trace={run.trace} /></>) : <p className="muted">Not launched yet.</p>}
+      {run ? (<><Outcome run={run} control={control} controls={controls} /><h4>Trail</h4><Trail trace={run.trace} attack={attack} /></>) : <p className="muted">Not launched yet.</p>}
     </section>
   );
 }
@@ -56,8 +56,8 @@ export default function AttackPage({ id, controls }) {
           </div>
           {error && <p role="alert" className="error">{error}</p>}
           <div className="sides">
-            <Side id="ungoverned" title="Ungoverned: the flaw is present" run={runs.ungoverned} control={control} controls={controls} />
-            <Side id="governed" title="Governed: the control is on" run={runs.governed} control={control} controls={controls}>
+            <Side id="ungoverned" title="Ungoverned: the flaw is present" run={runs.ungoverned} control={control} controls={controls} attack={attack} />
+            <Side id="governed" title="Governed: the control is on" run={runs.governed} control={control} controls={controls} attack={attack}>
               <label className="toggle">
                 <input type="checkbox" checked={controlOff} onChange={toggle} />
                 Turn this control off ({control?.name}) to prove it is what stops the attack
