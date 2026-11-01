@@ -5,13 +5,13 @@ import { isMockOnly, createLimiter, sourceKey, limitsFromEnv } from '../src/mock
 import { ATTACKS } from '../src/catalog.js';
 
 const servers = []; let guard;
-async function start(mockOnly) {
-  const { createApp } = await import('../src/app.js'); const { app, health } = await createApp({ mockOnly }); await health.ready;
+async function start(mockOnly, onMatrixCompute) {
+  const { createApp } = await import('../src/app.js'); const { app, health } = await createApp({ mockOnly, onMatrixCompute }); await health.ready;
   const server = await new Promise((r) => { const s = app.listen(0, '127.0.0.1', () => r(s)); });
   servers.push({ server, health }); return `http://127.0.0.1:${server.address().port}`;
 }
-let on, off;
-before(async () => { on = await start(true); off = await start(false); guard = installNetguard({ allowedPorts: servers.map((s) => s.server.address().port) }); });
+let on, off, onComputes = 0, offComputes = 0;
+before(async () => { on = await start(true, () => onComputes++); off = await start(false, () => offComputes++); guard = installNetguard({ allowedPorts: servers.map((s) => s.server.address().port) }); });
 after(() => { guard?.uninstall(); for (const s of servers) { s.health.stop(); s.server.close(); } });
 const post = (base, path, body) => fetch(base + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
 const REFUSAL = { error: 'mock_only', message: 'Disabled in the hosted mock.' };
@@ -99,8 +99,10 @@ test('on, under load: a burst of /api/run and /api/matrix is bounded (some 429/5
   health.stop();
 });
 test('on: the matrix is computed once and served from cache; off: it is recomputed', async () => {
-  const t = async (base) => { const s = Date.now(); const r = await fetch(`${base}/api/matrix`); await r.json(); return Date.now() - s; };
-  const first = await t(on); const second = await t(on);
-  assert.ok(second <= first, `cached ${second}ms vs first ${first}ms`);
-  const a = await (await fetch(`${on}/api/matrix`)).json(), b = await (await fetch(`${on}/api/matrix`)).json(); assert.deepEqual(a, b);
+  const get = async (base) => (await fetch(`${base}/api/matrix`)).json();
+  const on0 = onComputes, off0 = offComputes; // other tests may have hit the matrix already
+  const a = await get(on), b = await get(on); assert.deepEqual(a, b);
+  assert.ok(onComputes - on0 <= 1 && onComputes >= 1, 'mock-only computes the matrix once, however many requests');
+  await get(off); await get(off);
+  assert.equal(offComputes - off0, 2, 'off recomputes every request');
 });

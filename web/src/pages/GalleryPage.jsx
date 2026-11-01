@@ -1,5 +1,5 @@
 import { getCatalog } from '../api.js';
-import { Loading, RefBadge, attackHref, useLoad } from '../components/bits.jsx';
+import { AsiChips, Loading, RefBadge, attackHref, useLoad } from '../components/bits.jsx';
 
 export default function GalleryPage({ controlsById }) {
   const state = useLoad(getCatalog);
@@ -17,6 +17,7 @@ export default function GalleryPage({ controlsById }) {
                   <h3><a href={attackHref(a.id)}>{a.name}</a></h3>
                   <p>{a.goal}</p>
                   <p className="small"><strong>Stopped by:</strong> {controlsById[a.control]?.name || a.control}</p>
+                  <p className="small"><strong>OWASP ASI (lab reading):</strong> <AsiChips asi={a.asi} /></p>
                   <p className="small"><strong>Reference:</strong> <RefBadge r={a.references[0]} /></p>
                 </li>
               ))}

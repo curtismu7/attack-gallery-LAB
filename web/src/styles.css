@@ -127,3 +127,18 @@ details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-h
 .wire__row--hot td { background: var(--warn-soft); }
 .wire__notice { margin: .8rem 0 0; padding: .6rem .8rem; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
 .wire__table td:first-child { white-space: nowrap; }
+
+/* Release-claim banner, source tags and ASI mapping (slide 55). Tokens only. */
+.banner--claim { background: var(--accent-soft); border-bottom-color: var(--accent); }
+.claim-tag { display: inline-block; margin-left: .25rem; padding: 0 .45rem; font-size: .7rem; font-weight: 600; letter-spacing: .02em; border: 1px solid var(--edge); border-radius: 999px; color: var(--muted); background: var(--surface); white-space: nowrap; vertical-align: middle; }
+.present-bar__claim { padding: .1rem .6rem; border: 1px solid var(--bar-text); border-radius: 999px; font-size: .85rem; font-weight: 600; }
+.chips { display: inline-flex; flex-wrap: wrap; gap: .3rem; }
+.chip { display: inline-block; padding: 0 .5rem; border: 1px solid var(--edge); border-radius: 999px; font-size: .8rem; font-weight: 600; color: var(--text); text-decoration: none; background: var(--surface); }
+.chip[data-role="primary"] { border-color: var(--accent); background: var(--accent-soft); }
+.plain { list-style: none; margin: 0; padding: 0; display: grid; gap: .4rem; }
+.qualifier { margin: .4rem 0 0; padding: .2rem .5rem; border-left: 4px solid var(--warn); background: var(--warn-soft); }
+.badge[data-state="ok"] { color: var(--ok); border-color: var(--ok); background: var(--ok-soft); }
+.badge[data-state="bad"] { color: var(--bad); border-color: var(--bad); background: var(--bad-soft); }
+.badge[data-state="warn"] { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+.asi-item { padding: .5rem .8rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
+.asi-item h3 { margin: 0 0 .2rem; }

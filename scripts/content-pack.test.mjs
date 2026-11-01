@@ -25,3 +25,14 @@ test('the ten required terms are present and every source URL is recorded in doc
   assert.equal(pack.cards.filter((c) => c.story).length, 2);
 });
 test('a commit is recorded only when passed', () => { assert.equal(buildPack().source, undefined); assert.equal(buildPack({ commit: 'abc1234' }).source.commit, 'abc1234'); });
+
+test('the pack has the OWASP ASI card and a Why it matters entry (challenge, technical, business) marked as Ping claims; the glossary term says UNVERIFIED', () => {
+  const pack = buildPack(); const t = JSON.stringify(pack).toLowerCase();
+  assert.equal(pack.cards.find((c) => c.id === 'asi-mapping').action.href, '/#/asi');
+  const d = pack.cards.find((c) => c.id === 'concept-why-owasp').description;
+  assert.match(d, /Challenge:/); assert.match(d, /Technical:/); assert.match(d, /Business:/); assert.match(d, /Ping claims, unverified on our tenant/);
+  assert.match(pack.cards.find((c) => c.id === 'concept-why-owasp').label, /Ping claim, slide 55/);
+  assert.match(pack.glossary.find((g) => g.id === 'owasp-asi').definition, /UNVERIFIED on our tenant/); assert.match(pack.glossary.find((g) => g.id === 'owasp-asi').definition, /lab reading/);
+  assert.ok(!/https?:\/\/(?!(localhost|www\.rfc-editor\.org|modelcontextprotocol\.io))/.test(t), 'only localhost and the already-recorded spec hosts');
+  assert.ok(!/\bdoor\b/.test(t), 'say P1 Privilege Agent App, not door'); assert.ok(!/\d+ ?%/.test(d), 'no Ping percentage quoted');
+});

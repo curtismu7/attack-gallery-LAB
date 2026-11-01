@@ -79,7 +79,8 @@ export function PresentToggle() {
   return <button type="button" className="btn" aria-pressed={present} onClick={() => set(!present)} title="Presenter mode (p)">Present</button>;
 }
 
-export function PresentBar() {
+// claim (optional): the release-claim label, shown in the bar so it stays on screen in presenter mode when the page scrolls.
+export function PresentBar({ claim = null }) {
   const { present, set, steps, active, move, announce } = usePresent();
   if (!present) return null;
   const i = steps.findIndex((s) => s.n === active);
@@ -92,6 +93,7 @@ export function PresentBar() {
           <button type="button" className="btn" onClick={() => move(1)} disabled={i >= steps.length - 1}>Next</button>
         </>
       )}
+      {claim && <span className="present-bar__claim" data-testid="present-claim">{claim}</span>}
       <span className="sr-only" role="status" aria-live="polite">{announce}</span>
       <button type="button" className="btn present-bar__end" onClick={() => set(false)}>Exit (Esc)</button>
     </div>

@@ -7,6 +7,7 @@ Agent Attack Gallery: a self-contained demo where an SE launches 10 named attack
 - `npm install`, `npm run build`, `npm start` -> http://127.0.0.1:5181 (`GALLERY_PORT` changes it). `npm run dev`: API 5181, Vite 5182.
 - `npm test` runs server, web and scripts suites. Server uses `node --test test/*.test.js`: a glob, never a directory (a directory fails on Node 22).
 - `npm run doctor` (exit 1 on a failed check), `npm run e2e` (needs a build first; Chromium via Playwright).
+- OWASP ASI (deck slide 55): `server/src/asi.js` (table as qualified + attack mapping), `GET /api/asi`, `#/asi` tab. A Ping release claim, UNVERIFIED on our tenant: keep the claim banner on every page that shows it (`web/src/data/claim.js`), also in presenter mode; keep the deck's gaps (ASI04 pending, ASI06 in progress, ASI08-10 notes). Attack-to-row is a lab reading. `npm run docs` regenerates `docs/asi-mapping.md` and `docs/talk-track.md` (drift-tested).
 - Reset: `POST /api/reset` rebuilds keys and world state. Health: `GET /api/health` (`demo-health/1`).
 - `npm run content-pack` rebuilds and validates `content-pack.json`; `npm run docs` regenerates `docs/controls.md` and `docs/attack-catalog.md`.
 - Test on Node 20 and 22. CI: PRs run 22, main runs 20 and 22, plus a gitleaks job.

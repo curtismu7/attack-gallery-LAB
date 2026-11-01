@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { WHY } from '../server/src/asi.js';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const PACK_PATH = path.join(ROOT, 'content-pack.json');
@@ -34,6 +35,8 @@ const CARDS = [
   { id: 'story-which-as', label: 'Story: which authorization server is this?', description: 'Issuer mix-up: the client must read iss and compare it with the server it asked.', group: 'try-it', href: '/#/stories', terms: ['mix-up-attack', 'issuer-identification'], story: 'S02' },
   { id: 'ssrf-metadata', label: 'SSRF via metadata', description: 'A hostile server points metadata URLs at internal names; the governed client refuses them. Fake network only.', group: 'try-it', href: '/#/attack/ssrf-metadata', terms: ['ssrf'] },
   { id: 'confused-deputy-dcr', label: 'Confused deputy via static client and DCR', description: 'Why a proxy needs per-client consent.', group: 'try-it', href: '/#/attack/confused-deputy-dcr', terms: ['confused-deputy', 'dynamic-client-registration'] },
+  { id: 'asi-mapping', label: 'OWASP ASI mapping (Ping release claim, unverified on our tenant)', description: 'Slide 55 of the H2 2026 deck, ASI01 to ASI10 as qualified, with the gallery attacks the lab reads into each row. The mapping of attacks to rows is the lab\'s reading.', group: 'concept', href: '/#/asi', terms: ['owasp-asi'] },
+  { id: 'concept-why-owasp', label: 'Why it matters: OWASP Agentic AI Top 10 (Ping claim, slide 55)', description: `Challenge: ${WHY.challenge} Technical: ${WHY.technical} Business: ${WHY.business} Ping claims, unverified on our tenant.`, group: 'concept', href: '/#/asi', terms: ['owasp-asi'] },
   { id: 'controls', label: 'Controls', description: 'The ten named controls, the error each returns and the attack each stops.', group: 'concept', href: '/#/controls' },
   { id: 'limits', label: 'Honest limits', description: 'What the gallery does not claim, and which citations are UNVERIFIED.', group: 'reference', href: '/#/limits' },
 ];
@@ -52,7 +55,7 @@ export function buildPack({ commit } = {}) {
     title: 'Agent attack gallery',
     version: pkg.version,
     ...(commit ? { source: { repo: 'attack-gallery', commit } } : {}),
-    demo: { id: 'attack-gallery', name: 'Agent attack gallery', catalog: 'D33', baseUrl: 'http://localhost:5181', doctor: '/api/health', tags: ['mcp', 'authorization', 'attacks', 'mix-up', 'ssrf', 'audience'] },
+    demo: { id: 'attack-gallery', name: 'Agent attack gallery', catalog: 'D33', baseUrl: 'http://localhost:5181', doctor: '/api/health', tags: ['mcp', 'authorization', 'attacks', 'mix-up', 'ssrf', 'audience', 'owasp-asi'] },
     glossary: readJson('content/terms.json').sort(byId),
     sources: SOURCES.slice().sort(byId),
     cards: CARDS.map(({ href, ...c }) => ({ ...c, action: { type: 'route', href } })).sort(byId),

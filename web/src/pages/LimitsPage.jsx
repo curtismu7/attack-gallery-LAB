@@ -27,6 +27,7 @@ export default function LimitsPage({ controls }) {
         </Loading>
         <ul>
           <li>Any claim that a specific Ping product ships a given control. Only two controls cite a seed file showing the behaviour (the actor allow-list and the impersonation block); every other control is described as a gateway control of this kind.</li>
+          <li>The OWASP ASI table (slide 55 of Ping's "ID4AI Workforce - H2 2026" deck, release dated 2026-11-02): every control and note in it is a Ping release claim, not run on our tenant. Which attack touches which row is the lab's own reading.</li>
           <li>RFC 8414 authorization server metadata issuer matching, which this app does not rely on.</li>
         </ul>
       </section>
