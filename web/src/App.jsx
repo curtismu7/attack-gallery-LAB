@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getControls, getHealth } from './api.js';
-import { Loading, useLoad } from './components/bits.jsx';
+import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
+import { CLAIM_LABEL, hasClaim } from './data/claim.js';
 import { PresentBar, PresentProvider, PresentToggle } from './present/PresentMode.jsx';
 import GalleryPage from './pages/GalleryPage.jsx';
 import AttackPage from './pages/AttackPage.jsx';
@@ -9,8 +10,9 @@ import ComparePage from './pages/ComparePage.jsx';
 import LimitsPage from './pages/LimitsPage.jsx';
 import StoriesPage from './pages/StoriesPage.jsx';
 import DiagramPage from './pages/DiagramPage.jsx';
+import AsiPage from './pages/AsiPage.jsx';
 
-const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
+const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
 const THEME_KEY = 'gallery.theme';
 const route = () => { const [name = 'gallery', arg] = (window.location.hash.replace(/^#\/?/, '') || 'gallery').split('/'); return { name, arg }; };
 const readTheme = () => { try { return localStorage.getItem(THEME_KEY); } catch { return null; } };
@@ -44,6 +46,7 @@ export default function App() {
       case 'attack': return <AttackPage id={arg} controls={controls} />;
       case 'controls': return <ControlsPage controls={controls} />;
       case 'compare': return <ComparePage controls={controls} />;
+      case 'asi': return <AsiPage />;
       case 'stories': return <StoriesPage />;
       case 'diagram': return <DiagramPage controls={controls} />;
       case 'limits': return <LimitsPage controls={controls} />;
@@ -53,7 +56,7 @@ export default function App() {
   return (
     <PresentProvider>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-      <PresentBar />
+      <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
       <header className="top">
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
@@ -62,8 +65,9 @@ export default function App() {
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
         : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
+      {hasClaim(name) && <ClaimBanner />}
       <main id="main" tabIndex={-1} className="page">
-        <Loading state={ctl}>{() => page()}</Loading>
+        <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
     </PresentProvider>
   );

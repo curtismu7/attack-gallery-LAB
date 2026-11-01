@@ -6,12 +6,13 @@ import { CONTROLS, CONTROL_IDS, governed, governedExcept, ungoverned } from './p
 import { runAttack } from './runner.js';
 import { createKeyring } from './parties.js';
 import { createHealth } from './health.js';
+import { asiForAttack, asiTable } from './asi.js';
 import { isMockOnly, mockOnlyGuard, createLimiter, limitsFromEnv, hostGuard } from './mockonly.js';
 
 const MODES = ['ungoverned', 'governed', 'both'];
-const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected });
+const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected, asi: asiForAttack(id) });
 
-export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], limits = limitsFromEnv() } = {}) {
+export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], limits = limitsFromEnv(), onMatrixCompute } = {}) {
   let keyring = await createKeyring();
   const app = express();
   const health = createHealth({ mockOnly });
@@ -26,6 +27,8 @@ export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], li
   let matrixCache; // mock-only: the matrix is deterministic and /api/reset is refused, so compute it once
 
   app.get('/api/catalog', (req, res) => res.json({ packs: [{ id: 1, name: 'Pack 1: token and identity attacks' }, { id: 2, name: 'Pack 2: MCP authorization attacks' }], attacks: ATTACKS.map(publicAttack) }));
+  // The slide-55 OWASP ASI table as qualified, with the lab's attack mapping. A Ping release claim, UNVERIFIED on our tenant (see asi.js).
+  app.get('/api/asi', (req, res) => res.json(asiTable()));
   app.get('/api/controls', (req, res) => res.json({ controls: CONTROLS.map((c) => ({ id: c.id, name: c.name, does: c.does, error: c.error, status: c.status, message: c.message, references: c.refs, seed: c.seed, stops: ATTACKS.filter((a) => a.control === c.id).map((a) => a.id) })) }));
   app.post('/api/run', async (req, res, next) => {
     try {
@@ -46,6 +49,7 @@ export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], li
   app.get('/api/matrix', async (req, res, next) => {
     try {
       const compute = async () => {
+        onMatrixCompute?.();
         const cells = {};
         for (const a of ATTACKS) { cells[a.id] = {}; for (const c of CONTROL_IDS) cells[a.id][c] = (await runAttack(a, governedExcept(c), keyring)).succeeded; }
         return { attacks: ATTACKS.map((a) => a.id), controls: CONTROL_IDS, cells };

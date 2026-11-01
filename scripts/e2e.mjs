@@ -78,6 +78,14 @@ try {
   await go('limits'); await page.getByTestId('unverified-list').waitFor();
   check((await page.getByTestId('unverified-list').locator('li').count()) >= 2, 'honest limits lists unverified claims'); await shot('limits');
 
+  // OWASP ASI (slide 55): the deck's table as qualified, the claim banner, the lab's attack mapping
+  await go('asi'); await page.getByTestId('asi-table').waitFor();
+  check((await page.locator('[data-testid^="asi-ASI"]').count()) === 10, 'asi: ten rows, ASI01 to ASI10');
+  check((await page.getByTestId('claim-banner').innerText()).includes('Ping release claim, UNVERIFIED on our tenant'), 'asi: the release-claim banner is on the page');
+  check((await page.getByTestId('status-ASI04').innerText()) === 'PENDING part' && (await page.getByTestId('status-ASI06').innerText()) === 'IN PROGRESS', 'asi: ASI04 pending and ASI06 in progress are kept as the deck states them'); await shot('asi');
+  await go('attack/ssrf-metadata'); await page.getByTestId('asi-map-ASI04').waitFor();
+  check((await page.getByTestId('asi-panel').innerText()).includes('not a Privilege feature'), 'attack page: the ASI panel says the control is a mock'); await shot('attack-asi-panel');
+
   // stories
   await go('stories'); await page.getByTestId('story-panel').waitFor();
   await page.getByRole('button', { name: 'Control blocks' }).click(); await page.getByLabel('Vertical').selectOption('airlines');
@@ -91,9 +99,9 @@ try {
   check(c1 !== (await page.getByTestId('present-count').innerText()), `presenter: ArrowRight moves the step (${c1})`); await shot('presenter');
   await page.keyboard.press('Escape');
 
-  // diagram
+  // diagram. The Attack select is found by its label element: getByLabel('Attack') also matches the edges' aria-labels ("Edge from ... attacker"), which flicker in and out of the DOM and made this step flaky.
   await go('diagram'); await page.getByTestId('flow').waitFor(); await page.getByTestId('ctrl-iss_check').waitFor();
-  await page.getByLabel('Attack').selectOption('issuer-mixup'); await page.getByLabel('Speed').selectOption('4');
+  await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('issuer-mixup'); await page.getByLabel('Speed').selectOption('4');
   await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   const node = page.locator('.react-flow__node', { hasText: 'Evil AS' }); const b0 = await node.boundingBox();
   await page.mouse.move(b0.x + 20, b0.y + 20); await page.mouse.down(); await page.mouse.move(b0.x + 140, b0.y + 120, { steps: 8 }); await page.mouse.up();
@@ -113,12 +121,12 @@ try {
     check(chips.length === 10 && overlap.length === 0 && chips.every((c) => !c.clipped), `diagram: ten control chips, none overlap or truncate ${overlap.join(',')}`);
   }
   // governed SSRF: the real run attempts and refuses hops 2-4
-  await page.getByLabel('Attack').selectOption('ssrf-metadata');
+  await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('ssrf-metadata');
   await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 10000 });
   { const cls = await Promise.all([1, 2, 3, 4].map((n) => page.getByTestId(`hopnum-${n}`).getAttribute('class')));
     check(!cls[0].includes('hopnum--stop') && cls.slice(1).every((c) => c.includes('hopnum--stop')), 'diagram: governed ssrf-metadata refuses hops 2, 3 and 4'); }
-  await page.getByLabel('Attack').selectOption('issuer-mixup');
+  await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('issuer-mixup');
   await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   await page.getByRole('button', { name: 'Ungoverned' }).click(); await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 8000 });
@@ -146,7 +154,7 @@ try {
   check((await dp.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(20, 22, 26)', 'dark system preference is followed'); await dark.close();
   await page.getByRole('button', { name: 'Light theme' }).click().catch(() => {});
   await page.setViewportSize({ width: 375, height: 800 });
-  for (const hash of ['gallery', 'attack/audience-confusion', 'controls', 'compare', 'stories', 'diagram', 'limits']) {
+  for (const hash of ['gallery', 'attack/audience-confusion', 'controls', 'compare', 'asi', 'stories', 'diagram', 'limits']) {
     await go(hash); await sleep(400);
     if (hash.startsWith('attack')) { await page.getByRole('button', { name: 'Launch both' }).click(); await page.getByTestId('side-governed').getByTestId('flag').waitFor(); }
     const over = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);

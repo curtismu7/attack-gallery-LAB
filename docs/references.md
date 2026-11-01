@@ -42,3 +42,10 @@ D33 (this app) owns multi-step attacks. C23 owns token-shape errors (a single wr
 - 2026-10-21: the RFC texts were fetched in full as plain text (https://www.rfc-editor.org/rfc/rfc9728.txt, rfc9207.txt, rfc8707.txt, rfc8693.txt) and the cited sections were read directly, not through a summary: RFC 9728 sections 7.4 (audience-restricted tokens, SHOULD, via RFC 8707) and 7.7 (SSRF, clients SHOULD take precautions such as blocking internal IP ranges); RFC 9207 section 2.4 (MUST compare iss by simple string comparison); RFC 8707 section 2 (the AS SHOULD audience-restrict issued access tokens); RFC 8693 section 4.1 (outermost act is the current actor, nested act informational only). The VERIFIED labels in the UI rest on these readings. `content-pack.json` statuses are unchanged.
 - The two entries under "Not verified" stay UNVERIFIED.
 - 2026-10-25: the MCP authorization spec is now https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization (fetched and checked for its normative requirements: RFC 9207 issuer checks, Client ID Metadata Documents, resource parameter and audience checks). Links to the authorization page were updated from 2025-11-25. The security best-practices links were not changed.
+
+## Ping H2 2026 release deck (added with the OWASP ASI mapping)
+
+- "ID4AI Workforce - H2 2026", slide 55 (OWASP Agentic AI Top 10). A Ping document read from a local copy; it is not a fetched URL, so it is not in `content-pack.json` sources. The release is dated 2026-11-02 and is not on our tenant: every control and note in the ASI table (`server/src/asi.js`) is a Ping release claim, **UNVERIFIED on our tenant**, shown with the deck's own gaps (ASI04 fingerprint pinning pending, ASI06 gateway integration in progress, notes on ASI08, ASI09, ASI10). The category names ASI01 to ASI10 are the deck's; the OWASP document itself was not fetched or read.
+- Which attack touches which ASI row is the lab's reading (the deck does not map attacks). What the gallery says it shows for a row describes its own mocks.
+- Nothing from the console schema (swagger) is used by this app.
+

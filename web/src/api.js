@@ -5,3 +5,4 @@ export const getControls = () => fetch('/api/controls').then(json);
 export const getMatrix = () => fetch('/api/matrix').then(json);
 export const runAttack = (attackId, mode, controlsOff) => fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ attackId, mode, ...(controlsOff?.length ? { controlsOff } : {}) }) }).then(json);
 export const resetKeys = () => fetch('/api/reset', { method: 'POST' }).then(json);
+export const getAsi = () => fetch('/api/asi').then(json);

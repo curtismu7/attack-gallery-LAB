@@ -15,7 +15,8 @@
       "attacks",
       "mix-up",
       "ssrf",
-      "audience"
+      "audience",
+      "owasp-asi"
     ]
   },
   "glossary": [
@@ -77,6 +78,15 @@
       "aliases": [
         "BOLA",
         "per-user ownership check"
+      ]
+    },
+    {
+      "id": "owasp-asi",
+      "term": "OWASP Agentic AI Top 10 (ASI)",
+      "definition": "The Agentic Security Initiative list of ten agent risks, ASI01 to ASI10. Slide 55 of Ping's H2 2026 deck maps each to a Privilege control; that mapping is a Ping release claim, UNVERIFIED on our tenant. The gallery's own reading of which attack touches which row is a lab reading, and its controls are mocks.",
+      "aliases": [
+        "ASI",
+        "ASI01 to ASI10"
       ]
     },
     {
@@ -164,6 +174,19 @@
   ],
   "cards": [
     {
+      "id": "asi-mapping",
+      "label": "OWASP ASI mapping (Ping release claim, unverified on our tenant)",
+      "description": "Slide 55 of the H2 2026 deck, ASI01 to ASI10 as qualified, with the gallery attacks the lab reads into each row. The mapping of attacks to rows is the lab's reading.",
+      "group": "concept",
+      "terms": [
+        "owasp-asi"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/asi"
+      }
+    },
+    {
       "id": "compare",
       "label": "Compare matrix",
       "description": "Attacks against controls: with one control off, only its own attack succeeds.",
@@ -174,6 +197,19 @@
       "action": {
         "type": "route",
         "href": "/#/compare"
+      }
+    },
+    {
+      "id": "concept-why-owasp",
+      "label": "Why it matters: OWASP Agentic AI Top 10 (Ping claim, slide 55)",
+      "description": "Challenge: Security review now demands precise answers against the OWASP ASI taxonomy, and vague coverage claims stall approval and procurement. Technical: Each ASI category maps to a named control and mechanism, with the ASI08, ASI09 and ASI10 coverage notes stated plainly. Business: Framework-mapped answers accelerate security approval and de-risk the purchase. Ping claims, unverified on our tenant.",
+      "group": "concept",
+      "terms": [
+        "owasp-asi"
+      ],
+      "action": {
+        "type": "route",
+        "href": "/#/asi"
       }
     },
     {

@@ -7,12 +7,12 @@ A self-contained gallery where an SE launches NAMED attacks against a mock MCP-s
 | Part | State |
 | --- | --- |
 | Engine: 10 attacks, 10 controls, mock good AS, evil AS, gateway, resource server, DCR proxy, SSRF fake network | built, tested |
-| API: `/api/catalog`, `/api/run` (optional `controlsOff`), `/api/matrix`, `/api/controls`, `/api/reset`, `/api/health` (demo-health/1) | built, tested |
-| Web UI | Gallery, attack page (ungoverned / governed / both, control toggle), controls, compare matrix, honest limits, stories, ReactFlow diagram (movable boxes, Simulate, Reset, speed), presenter mode, light/dark |
+| API: `/api/catalog`, `/api/run` (optional `controlsOff`), `/api/matrix`, `/api/controls`, `/api/asi`, `/api/reset`, `/api/health` (demo-health/1) | built, tested |
+| Web UI | Gallery, OWASP ASI tab, attack page (ungoverned / governed / both, control toggle), controls, compare matrix, honest limits, stories, ReactFlow diagram (movable boxes, Simulate, Reset, speed), presenter mode, light/dark |
 | Docker (OrbStack) | `Dockerfile` + `docker-compose.yml`, loopback-only publish pinned by a test; verified live (see Docker) |
 | Shelf entry | `docs/shelf-entry.json`; verified against a running demo-shelf (state `ready`) |
 | Learning Hub content pack | `content-pack.json`, validated with ajv against `docs/content-pack.schema.json` (a copy of the kit's schema) |
-| Docs | `docs/safety.md`, `docs/architecture.md`, `docs/family.md`, `docs/controls.md` and `docs/attack-catalog.md` (both generated), `docs/references.md`, `CHANGELOG.md` |
+| Docs | `docs/safety.md`, `docs/architecture.md`, `docs/family.md`, `docs/controls.md`, `docs/attack-catalog.md`, `docs/asi-mapping.md` and `docs/talk-track.md` (all four generated, drift-tested), `docs/references.md`, `CHANGELOG.md` |
 
 ## Attacks
 
@@ -20,6 +20,16 @@ Pack 1: wrong scope; another user's account; bad client; rogue actor in `act`; i
 Pack 2 (MCP authorization): issuer mix-up (RFC 9207); token passthrough and audience confusion (RFC 8707); confused deputy via static client ID plus DCR; SSRF via metadata.
 
 Each attack is stopped by exactly one control (a flag in the policy). The tests prove it: with all controls on except one, only that control's attack succeeds.
+
+## OWASP Agentic Top 10 (ASI): Ping release claim, UNVERIFIED on our tenant
+
+The OWASP ASI tab (`#/asi`) shows the table from slide 55 of Ping's "ID4AI Workforce - H2 2026" deck (release dated 2026-11-02) exactly as the deck qualifies it: ASI04 fingerprint pinning is pending, ASI06 gateway integration is in progress, and ASI08, ASI09 and ASI10 carry notes. Every control named there is a Ping claim that was not run on our tenant. A banner says so on the gallery, attack, OWASP ASI and honest-limits pages, in presenter mode too.
+
+- Each attack carries the ASI rows it maps to (chips on the gallery card, a panel on the attack page, `asi` in `GET /api/catalog`). The deck does not map attacks, so the attack-to-row mapping is the lab's reading. Six of the ten rows (ASI01, ASI05, ASI06, ASI07, ASI08, ASI09) have no gallery attack, and the tab says "None" rather than stretch one over them.
+- Fields are tagged by source: **deck claim** (category, control text, status, qualifier), **lab reading** (attack mapping, cautions), **lab-invented** (what the gallery's mock controls show). Nothing is from the console schema and nothing is a measurement. The gallery's controls are mocks, not Privilege features.
+- The "Why it matters" lines (challenge, technical, business) come from the deck's value panel and are marked as Ping claims.
+- `docs/asi-mapping.md` and `docs/talk-track.md` are generated from the same data (`npm run docs`); a test fails when they are stale.
+- No field in this app names the old "Non-Human Identity" term, so the Federated Identity display rename changed nothing here.
 
 ## Safety
 

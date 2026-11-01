@@ -23,6 +23,8 @@ Pack 1. Named control: `scope_check`.
 
 **Story.** An agent holds a read-only token for Mark and calls the write tool anyway.
 
+**OWASP ASI (lab reading).** ASI02 (related), ASI03 (primary)
+
 **Steps.**
 
 1. Mark authorises the app with read-only scope
@@ -40,6 +42,8 @@ Pack 1. Named control: `ownership_check`.
 **Goal.** Read Mary's account with Mark's valid token.
 
 **Story.** Valid token, valid scope, someone else's object id (object-level access).
+
+**OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
@@ -59,6 +63,8 @@ Pack 1. Named control: `client_allowlist`.
 
 **Story.** Mark is phished into authorising an attacker app. The token is genuine; the client is not on the list.
 
+**OWASP ASI (lab reading).** ASI03 (primary)
+
 **Steps.**
 
 1. Mark authorises client-attacker
@@ -77,6 +83,8 @@ Pack 1. Named control: `act_validation`.
 
 **Story.** The token's signed act names agent-rogue. The caller also sends X-Actor-Client: agent-ok to be recorded as the trusted agent. See AI-DEMO2 docs/use-cases/confused-deputy-actor-injection.md.
 
+**OWASP ASI (lab reading).** ASI03 (primary), ASI10 (related)
+
 **Steps.**
 
 1. agent-rogue performs a real exchange: act.sub = agent-rogue
@@ -94,6 +102,8 @@ Pack 1. Named control: `require_delegation`.
 
 **Story.** Mark's user token has no act claim. The call looks like Mark himself.
 
+**OWASP ASI (lab reading).** ASI03 (primary)
+
 **Steps.**
 
 1. A user token for Mark, no act claim
@@ -110,6 +120,8 @@ Pack 1. Named control: `no_token_forwarding`.
 **Goal.** Capture Mark's live token from a downstream service's logs and replay it.
 
 **Story.** The gateway passes the inbound bearer token to a third-party billing backend. Anything that backend logs is now a working credential.
+
+**OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
@@ -129,6 +141,8 @@ Pack 2. Named control: `iss_check`.
 **Goal.** Get Mark's authorization code and PKCE verifier delivered to an evil authorization server.
 
 **Story.** The client starts with the evil AS. The evil AS bounces the user to the good AS, which issues a code. The response carries iss = the good AS, but the client believes it is talking to the evil one.
+
+**OWASP ASI (lab reading).** ASI03 (primary), ASI04 (related)
 
 **Steps.**
 
@@ -150,6 +164,8 @@ Pack 2. Named control: `audience_binding`.
 
 **Story.** Mark's token was issued for the billing API (aud = billing). The attacker presents it at the MCP gateway.
 
+**OWASP ASI (lab reading).** ASI03 (primary)
+
 **Steps.**
 
 1. A genuine token for Mark, audience = billing API
@@ -169,6 +185,8 @@ Pack 2. Named control: `consent_check`.
 
 **Story.** An MCP proxy uses one static client ID at a third-party AS. Mark consented once, so the third-party AS sets a consent cookie. The attacker registers a client by DCR with their own redirect URI and sends Mark a link.
 
+**OWASP ASI (lab reading).** ASI03 (primary)
+
 **Steps.**
 
 1. Mark signs in through the legitimate client (consent approved, cookie set)
@@ -186,6 +204,8 @@ Pack 2. Named control: `ssrf_guard`.
 **Goal.** Make the client fetch internal addresses named by a hostile MCP server.
 
 **Story.** A hostile MCP server answers 401 with a resource_metadata URL that points at the link-local metadata address, lists a name that resolves to loopback as its authorization server, and redirects to a private address. All of it runs on a fake network.
+
+**OWASP ASI (lab reading).** ASI02 (primary), ASI04 (related)
 
 **Steps.**
 
