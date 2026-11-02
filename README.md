@@ -46,7 +46,7 @@ The OWASP ASI tab (`#/asi`) shows the table from slide 55 of Ping's "ID4AI Workf
 
 ## Run
 
-Needs Node 20 or newer (the image uses 22).
+Needs Node 26 or newer (the image currently uses 22).
 
 ```
 npm install
