@@ -1,10 +1,9 @@
 /* Presenter mode. Type scales through --present-scale; hiding is keyed on data-present and the data-admin-only tag. */
 :root { --present-scale: 1.25; }
 :root[data-present="1"] { font-size: calc(100% * var(--present-scale)); }
-:root[data-present="1"] [data-admin-only] { display: none !important; }
+:root[data-present="1"] [data-admin-only] { display: none; }
 :root[data-present="1"] [data-step-active] { outline: 3px solid var(--accent); outline-offset: 2px; }
 :root[data-present="1"] [id^="gal-step-"] { scroll-margin-top: 5rem; }
-.present-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; padding: .5rem 1rem; background: var(--bar-bg); color: var(--bar-text); border-bottom: 1px solid var(--border); }
+.present-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; padding: .5rem 1rem; background: var(--box-dark); color: var(--on-box); border-bottom: 1px solid var(--border); }
 .present-bar__count { font-weight: 700; font-variant-numeric: tabular-nums; }
 .present-bar__end { margin-left: auto; }
-.present-bar .btn:disabled { opacity: .45; cursor: default; }
