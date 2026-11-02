@@ -36,7 +36,7 @@ export function Trail({ trace, attack }) {
               <pre className="code">{pretty({ request: { ...t.request, token: undefined }, response: { ...t.response, token: undefined } })}</pre>
             </details>
             {attack && (<>
-              <button type="button" className="btn" aria-expanded={open.has(t.n)} onClick={() => toggle(t.n)} data-testid={`wire-btn-${t.n}`}>{open.has(t.n) ? 'Hide' : 'Show'} on the wire</button>
+              <button type="button" aria-expanded={open.has(t.n)} onClick={() => toggle(t.n)} data-testid={`wire-btn-${t.n}`}>{open.has(t.n) ? 'Hide' : 'Show'} on the wire</button>
               {open.has(t.n) && <WirePanel attack={attack} entry={t} />}
             </>)}
           </li>

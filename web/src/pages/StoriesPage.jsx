@@ -14,7 +14,7 @@ export default function StoriesPage() {
         {STORIES.map((s) => <button key={s.id} type="button" aria-pressed={s.id === id} onClick={() => setId(s.id)}>{s.title}</button>)}
       </div>
       <StoryPanel key={story.id} story={story} />
-      <p>{story.modes.map((m) => <a key={m} className="btn" href={attackHref(m)}>Run the attack for this story</a>)}</p>
+      <p>{story.modes.map((m) => <a key={m} className="link-button" href={attackHref(m)}>Run the attack for this story</a>)}</p>
     </>
   );
 }

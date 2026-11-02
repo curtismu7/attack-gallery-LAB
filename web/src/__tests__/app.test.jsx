@@ -216,10 +216,11 @@ describe('inert text: hostile strings never execute or become markup', () => {
 
 describe('theme tokens', () => {
   const css = readFileSync('src/styles.css', 'utf8') + readFileSync('src/story/story.css', 'utf8');
+  const shared = readFileSync('src/standalone-ui.css', 'utf8'); // dark and light tokens and reduced motion live in the shared sheet
   it('defines dark and light tokens and no purple', () => {
-    expect(css).toMatch(/prefers-color-scheme: dark/); expect(css).toMatch(/\[data-theme="dark"\]/); expect(css).toMatch(/\[data-theme="light"\]/);
+    expect(shared).toMatch(/prefers-color-scheme: dark/); expect(shared).toMatch(/\[data-theme="dark"\]/); expect(shared).toMatch(/\[data-theme="light"\]/);
     expect(css).not.toMatch(/purple|violet|indigo|magenta/i);
     for (const m of css.matchAll(/#([0-9a-f]{6})\b/gi)) { const [r, g, b] = [0, 2, 4].map((i) => parseInt(m[1].slice(i, i + 2), 16)); expect(!(b > r + 25 && b > g + 25 && r > g + 25), `#${m[1]} looks purple`).toBe(true); }
   });
-  it('has a mobile breakpoint and honours reduced motion', () => { expect(css).toMatch(/max-width: 40rem/); expect(css).toMatch(/prefers-reduced-motion/); });
+  it('has a mobile breakpoint and honours reduced motion', () => { expect(css).toMatch(/max-width: 600px/); expect(shared).toMatch(/prefers-reduced-motion/); });
 });
