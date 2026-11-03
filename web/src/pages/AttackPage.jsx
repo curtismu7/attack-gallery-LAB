@@ -81,9 +81,9 @@ export default function AttackPage({ id, controls }) {
           </dl>
           <AsiPanel attack={attack} control={control} asi={asi} />
           <div className="actions" role="group" aria-label="Launch">
-            <button type="button" className="btn" disabled={busy} onClick={() => launch('ungoverned')}>Launch ungoverned</button>
-            <button type="button" className="btn" disabled={busy} onClick={() => launch('governed')}>Launch governed</button>
-            <button type="button" className="btn btn--primary" disabled={busy} onClick={() => launch('both')}>Launch both</button>
+            <button type="button" disabled={busy} onClick={() => launch('ungoverned')}>Launch ungoverned</button>
+            <button type="button" disabled={busy} onClick={() => launch('governed')}>Launch governed</button>
+            <button type="button" className="primary" disabled={busy} onClick={() => launch('both')}>Launch both</button>
           </div>
           {error && <p role="alert" className="error">{error}</p>}
           <div className="sides">
