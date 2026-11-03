@@ -1,6 +1,8 @@
-# Agent Attack Gallery
+# Agent Attack Gallery LAB
 
 A self-contained gallery where an SE launches NAMED attacks against a mock MCP-style stack and sees each one refused, with the reason and the named control. Every attack runs twice: UNGOVERNED (the mock stack has the flaw, so the attack succeeds and you see what the attacker gets) and GOVERNED (the named control refuses with an educational error).
+
+Repo: https://github.com/ping-sandbox/attack-gallery-LAB
 
 ## Status
 
