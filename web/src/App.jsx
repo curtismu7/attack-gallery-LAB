@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { getControls, getHealth } from './api.js';
+import { getControls, getHealth, getInfo, setMode } from './api.js';
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
+import ModeToggle from './components/ModeToggle.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
 import { PresentBar, PresentProvider, PresentToggle } from './present/PresentMode.jsx';
 import GalleryPage from './pages/GalleryPage.jsx';
@@ -35,7 +36,11 @@ export default function App() {
   const [dark, flip] = useTheme();
   const ctl = useLoad(getControls);
   const [mockOnly, setMockOnly] = useState(false);
+  const [modeInfo, setModeInfo] = useState(null);
   useEffect(() => { getHealth().then((h) => setMockOnly(h.mode === 'mock-only')).catch(() => {}); }, []);
+  useEffect(() => { getInfo().then(setModeInfo).catch(() => {}); }, []);
+  // Rule 19: the toggle asks the server; a refusal keeps the current mode on screen.
+  const selectMode = async (source) => { try { setModeInfo(await setMode(source)); } catch { /* keep showing the current mode */ } };
   const first = useRef(true);
   // On a route change (not the first load) move focus to main so keyboard and screen reader users land on the new page.
   useEffect(() => { document.title = 'Agent Attack Gallery'; if (first.current) { first.current = false; return; } document.getElementById('main')?.focus?.({ preventScroll: true }); window.scrollTo?.(0, 0); }, [name, arg]);
@@ -60,7 +65,7 @@ export default function App() {
       <header className="top">
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
-        <div className="top__tools"><PresentToggle /><button type="button" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
+        <div className="top__tools"><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle /><button type="button" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
       </header>
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>

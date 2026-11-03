@@ -23,6 +23,18 @@ export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], li
   app.use(express.json({ limit: '4kb' }));
   if (mockOnly) app.use(mockOnlyGuard);
   app.use('/api/health', health.router); // health is registered before the limiter and is never throttled
+  // Rule 19: the Mock/Real toggle's API. The gallery is mock only (every party is an in-process mock), so Real
+  // is never available (409). The hosted build (MOCK_ONLY) refuses every switch (403).
+  const NO_REAL = 'Real is not available: every party here is a mock inside this app and nothing leaves the machine.';
+  const modeInfo = () => ({ mode: mockOnly ? 'mock-only' : 'local', hosted: mockOnly, source: 'mock', realAvailable: false });
+  app.get('/api/info', (_req, res) => res.json(modeInfo()));
+  app.post('/api/mode', (req, res) => {
+    const b = req.body;
+    if (b === null || typeof b !== 'object' || Array.isArray(b) || Object.keys(b).length !== 1 || !['mock', 'real'].includes(b.source)) return res.status(400).json({ error: 'bad_request', message: 'body must be exactly {source: "mock" or "real"}' });
+    if (mockOnly) return res.status(403).json({ error: 'mock_only', message: 'The hosted build is Mock only and cannot be switched.' });
+    if (b.source === 'real') return res.status(409).json({ error: 'conflict', message: NO_REAL });
+    return res.json(modeInfo());
+  });
   if (mockOnly) app.use(['/api/run', '/api/matrix'], createLimiter(limits));
   let matrixCache; // mock-only: the matrix is deterministic and /api/reset is refused, so compute it once
 
