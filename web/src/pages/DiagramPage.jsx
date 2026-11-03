@@ -97,11 +97,11 @@ export default function DiagramPage({ controls }) {
     const flow = hops.map((h, i) => {
       const lit = i < step; const cur = i === step - 1;
       const blocked = h.step ? lit && hopTrace(run, h)?.verdict === 'refused' : stopped && i === step - 1 && h.ctrl === attack?.control;
-      const color = blocked ? 'var(--bad)' : lit ? 'var(--accent)' : 'var(--edge)';
+      const color = blocked ? 'var(--danger-text)' : lit ? 'var(--accent)' : 'var(--border)';
       return { id: `h${i}`, source: h.from, target: h.to, ...w[i], type: 'hop', animated: cur && playing, data: { num: i + 1, lit, blocked },
         style: { stroke: color, strokeWidth: lit ? 3 : 1.5, opacity: lit || step === 0 ? 1 : 0.45 }, markerEnd: { type: MarkerType.ArrowClosed, color } };
     });
-    const host = attack && { id: 'ctrl-edge', source: `ctrl-${attack.control}`, target: CONTROL_HOST[attack.control], sourceHandle: 't0', targetHandle: 'b0', style: { stroke: 'var(--ok)', strokeDasharray: '5 4' }, type: 'hop' };
+    const host = attack && { id: 'ctrl-edge', source: `ctrl-${attack.control}`, target: CONTROL_HOST[attack.control], sourceHandle: 't0', targetHandle: 'b0', style: { stroke: 'var(--status-ok)', strokeDasharray: '5 4' }, type: 'hop' };
     return host ? [...flow, host] : flow;
   }, [hops, step, playing, attack, stopped, run]);
 
@@ -122,8 +122,8 @@ export default function DiagramPage({ controls }) {
                 <button type="button" aria-pressed={mode === 'ungoverned'} onClick={() => setMode('ungoverned')}>Ungoverned</button>
                 <button type="button" aria-pressed={mode === 'governed'} onClick={() => setMode('governed')}>Governed</button>
               </div>
-              <button type="button" className="btn btn--primary" onClick={simulate} disabled={!run || playing}>Simulate</button>
-              <button type="button" className="btn" onClick={reset}>Reset</button>
+              <button type="button" className="primary" onClick={simulate} disabled={!run || playing}>Simulate</button>
+              <button type="button" onClick={reset}>Reset</button>
               <label className="field">Speed
                 <select value={speed} onChange={(e) => setSpeed(Number(e.target.value))} aria-label="Speed">
                   <option value={0.5}>0.5x</option><option value={1}>1x</option><option value={2}>2x</option><option value={4}>4x</option>

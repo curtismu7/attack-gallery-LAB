@@ -102,7 +102,7 @@ try {
   // diagram. The Attack select is found by its label element: getByLabel('Attack') also matches the edges' aria-labels ("Edge from ... attacker"), which flicker in and out of the DOM and made this step flaky.
   await go('diagram'); await page.getByTestId('flow').waitFor(); await page.getByTestId('ctrl-iss_check').waitFor();
   await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('issuer-mixup'); await page.getByLabel('Speed').selectOption('4');
-  await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
+  await page.waitForFunction(() => !document.querySelector('button.primary').disabled);
   const node = page.locator('.react-flow__node', { hasText: 'Evil AS' }); const b0 = await node.boundingBox();
   await page.mouse.move(b0.x + 20, b0.y + 20); await page.mouse.down(); await page.mouse.move(b0.x + 140, b0.y + 120, { steps: 8 }); await page.mouse.up();
   await sleep(200); const b1 = await node.boundingBox(); check(Math.abs(b1.x - b0.x) > 50, 'diagram: a box can be dragged');
@@ -122,13 +122,13 @@ try {
   }
   // governed SSRF: the real run attempts and refuses hops 2-4
   await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('ssrf-metadata');
-  await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
+  await page.waitForFunction(() => !document.querySelector('button.primary').disabled);
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 10000 });
   { const cls = await Promise.all([1, 2, 3, 4].map((n) => page.getByTestId(`hopnum-${n}`).getAttribute('class')));
     check(!cls[0].includes('hopnum--stop') && cls.slice(1).every((c) => c.includes('hopnum--stop')), 'diagram: governed ssrf-metadata refuses hops 2, 3 and 4'); }
   await page.locator('label.field', { hasText: /^Attack/ }).locator('select').selectOption('issuer-mixup');
-  await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
-  await page.getByRole('button', { name: 'Ungoverned' }).click(); await page.waitForFunction(() => !document.querySelector('button.btn--primary').disabled);
+  await page.waitForFunction(() => !document.querySelector('button.primary').disabled);
+  await page.getByRole('button', { name: 'Ungoverned' }).click(); await page.waitForFunction(() => !document.querySelector('button.primary').disabled);
   await page.getByRole('button', { name: 'Simulate' }).click(); await page.getByTestId('diagram-outcome').waitFor({ timeout: 8000 });
   check((await page.getByTestId('diagram-outcome').innerText()).includes('Attacker gained'), 'diagram: ungoverned simulation ends with the gain'); await shot('diagram-ungoverned');
 
@@ -147,11 +147,11 @@ try {
   // dark theme and narrow width
   await go('attack/issuer-mixup'); await page.getByRole('button', { name: 'Launch both' }).click(); await page.getByTestId('side-governed').getByTestId('flag').waitFor();
   await page.getByRole('button', { name: 'Dark theme' }).click();
-  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor); check(bg === 'rgb(20, 22, 26)', `dark theme applied (body ${bg})`); await shot('attack-dark');
+  const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor); check(bg === 'rgb(5, 23, 39)', `dark theme applied (body ${bg})`); await shot('attack-dark');
   for (const hash of ['gallery', 'diagram', 'compare']) { await go(hash); await sleep(500); await shot(`dark-${hash}`); }
   const dark = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' }); const dp = await dark.newPage();
   await dp.goto(`${base}/#/gallery`); await dp.getByTestId('card-wrong-scope').waitFor();
-  check((await dp.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(20, 22, 26)', 'dark system preference is followed'); await dark.close();
+  check((await dp.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(5, 23, 39)', 'dark system preference is followed'); await dark.close();
   await page.getByRole('button', { name: 'Light theme' }).click().catch(() => {});
   await page.setViewportSize({ width: 375, height: 800 });
   for (const hash of ['gallery', 'attack/audience-confusion', 'controls', 'compare', 'asi', 'stories', 'diagram', 'limits']) {

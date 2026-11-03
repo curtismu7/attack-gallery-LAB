@@ -21,7 +21,7 @@ function WireCompare({ attacks }) {
       <p className="muted">Pick an attack to see the exact request the attacker sends and the reply, once with the flaw present and once with the control on. The highlighted field is the one that decides.</p>
       <div className="actions">
         <label className="field">Attack <select value={id} onChange={(e) => { setId(e.target.value); setRuns(null); }}>{attacks.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}</select></label>
-        <button type="button" className="btn btn--primary" onClick={show} data-testid="wire-compare-go">Show both on the wire</button>
+        <button type="button" className="primary" onClick={show} data-testid="wire-compare-go">Show both on the wire</button>
       </div>
       {error && <p role="alert" className="error">{error}</p>}
       {runs && runs.id === id && (

@@ -76,7 +76,7 @@ export function PresentProvider({ children }) {
 
 export function PresentToggle() {
   const { present, set } = usePresent();
-  return <button type="button" className="btn" aria-pressed={present} onClick={() => set(!present)} title="Presenter mode (p)">Present</button>;
+  return <button type="button" aria-pressed={present} onClick={() => set(!present)} title="Presenter mode (p)">Present</button>;
 }
 
 // claim (optional): the release-claim label, shown in the bar so it stays on screen in presenter mode when the page scrolls.
@@ -88,14 +88,14 @@ export function PresentBar({ claim = null }) {
     <div className="present-bar" role="toolbar" aria-label="Presenter controls">
       {steps.length > 0 && (
         <>
-          <button type="button" className="btn" onClick={() => move(-1)} disabled={i <= 0}>Previous</button>
+          <button type="button" onClick={() => move(-1)} disabled={i <= 0}>Previous</button>
           <span className="present-bar__count" data-testid="present-count">Step {i + 1} of {steps.length}</span>
-          <button type="button" className="btn" onClick={() => move(1)} disabled={i >= steps.length - 1}>Next</button>
+          <button type="button" onClick={() => move(1)} disabled={i >= steps.length - 1}>Next</button>
         </>
       )}
       {claim && <span className="present-bar__claim" data-testid="present-claim">{claim}</span>}
       <span className="sr-only" role="status" aria-live="polite">{announce}</span>
-      <button type="button" className="btn present-bar__end" onClick={() => set(false)}>Exit (Esc)</button>
+      <button type="button" className="present-bar__end" onClick={() => set(false)}>Exit (Esc)</button>
     </div>
   );
 }
