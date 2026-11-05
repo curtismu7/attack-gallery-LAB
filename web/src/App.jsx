@@ -12,6 +12,7 @@ import LimitsPage from './pages/LimitsPage.jsx';
 import StoriesPage from './pages/StoriesPage.jsx';
 import DiagramPage from './pages/DiagramPage.jsx';
 import AsiPage from './pages/AsiPage.jsx';
+import ShelfLink from "./components/ShelfLink.jsx";
 
 const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
 const THEME_KEY = 'gallery.theme';
@@ -65,7 +66,8 @@ export default function App() {
       <header className="top">
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
-        <div className="top__tools"><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle /><button type="button" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
+        <div className="top__tools">
+            <ShelfLink /><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle /><button type="button" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
       </header>
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>

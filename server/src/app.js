@@ -8,6 +8,7 @@ import { createKeyring } from './parties.js';
 import { createHealth } from './health.js';
 import { asiForAttack, asiTable } from './asi.js';
 import { isMockOnly, mockOnlyGuard, createLimiter, limitsFromEnv, hostGuard } from './mockonly.js';
+import { shelfInfo } from './shelfLink.js';
 
 const MODES = ['ungoverned', 'governed', 'both'];
 const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected, asi: asiForAttack(id) });
@@ -78,6 +79,7 @@ export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], li
   const dist = fileURLToPath(new URL('../../web/dist', import.meta.url));
   if (existsSync(dist)) app.use(express.static(dist));
   app.use('/api', (req, res) => res.status(404).json({ error: 'not_found' }));
+  app.get('/api/shelf', (_req, res) => { res.set('Cache-Control', 'no-store'); res.json(shelfInfo()); }); // the header "Shelf" button
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {
     if (err.type === 'entity.too.large') return res.status(413).json({ error: 'payload_too_large', message: 'Request body is limited to 4 KB.' });
