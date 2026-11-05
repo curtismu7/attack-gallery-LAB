@@ -9,6 +9,7 @@ services:
     ports:
       - "127.0.0.1:${HOST_PORT:-5181}:5181"
     environment:
+      SHELF_URL: ${SHELF_URL:-}
       GALLERY_PORT: "5181"
       GALLERY_HOST: 0.0.0.0
       GALLERY_BIND: "1"
