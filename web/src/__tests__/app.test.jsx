@@ -52,8 +52,8 @@ describe('shell', () => {
   });
   it('the theme button flips light and dark', async () => {
     render(<App />); await screen.findByRole('heading', { name: 'Attack gallery' });
-    const b = screen.getByRole('button', { name: /theme/i }); const was = b.getAttribute('aria-pressed');
-    fireEvent.click(b); expect(b.getAttribute('aria-pressed')).not.toBe(was); expect(document.documentElement.dataset.theme).toBeTruthy();
+    const sel = screen.getByTestId('theme');
+    fireEvent.change(sel, { target: { value: 'dark' } }); expect(document.documentElement.dataset.theme).toBe('dark');
   });
   it('presenter mode toggles, enlarges type and hides admin-only blocks', async () => {
     go('#/attack/audience-confusion'); await screen.findByTestId('story-panel');

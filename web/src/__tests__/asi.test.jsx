@@ -139,7 +139,7 @@ describe('switching vertical, story path, launch mode and theme on every tab nev
     for (const h of ROUTES) {
       window.location.hash = h; await waitFor(drawn);
       await waitFor(() => expect(within(document.getElementById('main')).queryByText('Loading...')).toBeNull());
-      fireEvent.click(screen.getByRole('button', { name: /theme/i })); drawn();
+      fireEvent.change(screen.getByTestId('theme'), { target: { value: 'dark' } }); drawn();
       fireEvent.click(screen.getByRole('button', { name: 'Present' })); drawn(); fireEvent.keyDown(window, { key: 'Escape' }); drawn();
     }
   });

@@ -25,16 +25,15 @@ function useRoute() {
   return r;
 }
 function useTheme() {
-  const [theme, setTheme] = useState(readTheme); // null = follow the system
-  useEffect(() => { if (theme) document.documentElement.dataset.theme = theme; else delete document.documentElement.dataset.theme; }, [theme]);
-  const set = (t) => { setTheme(t); try { if (t) localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); } catch { /* not remembered */ } };
-  const dark = theme ? theme === 'dark' : !!window.matchMedia?.('(prefers-color-scheme: dark)').matches;
-  return [dark, () => set(dark ? 'light' : 'dark')];
+  const [theme, setTheme] = useState(() => readTheme() || 'auto'); // 'auto' = follow the system
+  useEffect(() => { if (theme && theme !== 'auto') document.documentElement.dataset.theme = theme; else delete document.documentElement.dataset.theme; }, [theme]);
+  const setThemePersist = (t) => { setTheme(t); try { if (t && t !== 'auto') localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); } catch { /* not remembered */ } };
+  return [theme, setThemePersist];
 }
 
 export default function App() {
   const { name, arg } = useRoute();
-  const [dark, flip] = useTheme();
+  const [theme, setThemePersist] = useTheme();
   const ctl = useLoad(getControls);
   const [mockOnly, setMockOnly] = useState(false);
   const [modeInfo, setModeInfo] = useState(null);
@@ -67,7 +66,14 @@ export default function App() {
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
         <div className="top__tools">
-            <ShelfLink /><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle /><button type="button" aria-pressed={dark} onClick={flip}>{dark ? 'Light theme' : 'Dark theme'}</button></div>
+            <ShelfLink /><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle />
+            <label className="inline">Theme
+              <select value={theme} onChange={(e) => setThemePersist(e.target.value)} data-testid="theme">
+                <option value="auto">Auto</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </label></div>
       </header>
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
