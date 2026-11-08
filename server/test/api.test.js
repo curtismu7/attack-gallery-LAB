@@ -66,3 +66,13 @@ test('responses carry a CSP that forbids inline script and outside connections',
   const csp = (await fetch(`${base}/api/health`)).headers.get('content-security-policy');
   assert.match(csp, /script-src 'self'/); assert.match(csp, /connect-src 'self'/); assert.ok(!/script-src[^;]*unsafe-inline/.test(csp));
 });
+
+test('GET /api/shelf answers with the configured SHELF_URL (no web build needed) and is GET only', async () => {
+  const prev = process.env.SHELF_URL;
+  process.env.SHELF_URL = 'https://shelf.example:8443/';
+  try {
+    const r = await fetch(`${base}/api/shelf`); assert.equal(r.status, 200); assert.equal(r.headers.get('cache-control'), 'no-store');
+    assert.deepEqual(await r.json(), { shelfUrl: 'https://shelf.example:8443' });
+    assert.notEqual((await post('/api/shelf', {})).status, 200);
+  } finally { if (prev === undefined) delete process.env.SHELF_URL; else process.env.SHELF_URL = prev; }
+});
