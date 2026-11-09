@@ -9,16 +9,23 @@ import { createHealth } from './health.js';
 import { asiForAttack, asiTable } from './asi.js';
 import { isMockOnly, mockOnlyGuard, createLimiter, limitsFromEnv, hostGuard } from './mockonly.js';
 import { shelfInfo } from './shelfLink.js';
+import { makeHostGuard, makeOriginGuard, proxyHostSet } from './sameorigin.js';
 
 const MODES = ['ungoverned', 'governed', 'both'];
 const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected, asi: asiForAttack(id) });
 
-export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], limits = limitsFromEnv(), onMatrixCompute } = {}) {
+export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], labHosts = [], port = 5181, limits = limitsFromEnv(), onMatrixCompute } = {}) {
   let keyring = await createKeyring();
   const app = express();
   const health = createHealth({ mockOnly });
   app.disable('x-powered-by');
-  if (allowedHosts.length) app.use(hostGuard(allowedHosts)); // before everything, health included
+  // Host check, before everything, health included. The hosted build (GALLERY_ALLOWED_HOSTS) answers its named hosts only;
+  // a local run answers loopback plus the LAB_ALLOWED_HOSTS names (the lab-proxy's name for this app) on this app's port.
+  const proxyHosts = proxyHostSet(labHosts, port);
+  app.use(allowedHosts.length ? hostGuard(allowedHosts) : makeHostGuard(proxyHosts));
+  // Same-origin writes: a foreign Origin on any write is refused (403). In the hosted build the page's own https origin counts.
+  const hostedSame = (h) => allowedHosts.includes(String(h.host || '').toLowerCase().replace(/:\d+$/, '')) && [`https://${h.host}`, `http://${h.host}`].includes(h.origin);
+  app.use(makeOriginGuard(proxyHosts, hostedSame));
   // Inert-text defence in depth: nothing from a response can run script, and the page may only talk to itself.
   app.use((req, res, next) => { res.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'"); next(); });
   app.use(express.json({ limit: '4kb' }));

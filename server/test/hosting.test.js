@@ -17,9 +17,9 @@ test('defaults stay loopback; MOCK_ONLY alone does not unlock a non-loopback bin
 });
 
 test('hosted settings (MOCK_ONLY + GALLERY_HOST + GALLERY_BIND) bind all interfaces and serve the readiness probe under a cluster Host header', async () => {
-  const { host, port } = resolveBind(HOSTED);
+  const { host, port, allowedHosts } = resolveBind({ ...HOSTED, GALLERY_ALLOWED_HOSTS: 'gallery.apps.example.internal' });
   assert.equal(host, '0.0.0.0');
-  const { app, health } = await createApp({ mockOnly: true }); await health.ready;
+  const { app, health } = await createApp({ mockOnly: true, allowedHosts }); await health.ready;
   const server = await new Promise((r) => { const s = app.listen(port, '127.0.0.1', () => r(s)); }); // test binds loopback; the bind decision itself is asserted above
   try {
     const r = await get(server.address().port, '/api/health', 'gallery.apps.example.internal');
@@ -37,7 +37,7 @@ test('MOCK_ONLY on a non-loopback bind refuses to start without GALLERY_ALLOWED_
   assert.equal(resolveBind({ GALLERY_HOST: '0.0.0.0', GALLERY_BIND: '1' }).host, '0.0.0.0');
 });
 
-test('Host allow-list: exact match only, port and case ignored, everything else 403 (health included); no list means no check', async () => {
+test('Host allow-list: exact match only, port and case ignored, everything else 403 (health included); no list means loopback plus LAB_ALLOWED_HOSTS (sameorigin.test.js)', async () => {
   const { app, health } = await createApp({ mockOnly: true, allowedHosts: ['gallery.example'] }); await health.ready;
   const server = await new Promise((r) => { const s = app.listen(0, '127.0.0.1', () => r(s)); });
   const port = server.address().port;

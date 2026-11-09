@@ -40,3 +40,8 @@ test('the image runs as a non-root user on Node 22 and the container is locked d
   const dc = fs.readFileSync(new URL('../docker-compose.yml', import.meta.url), 'utf8');
   for (const s of ['read_only: true', 'cap_drop: [ALL]', 'no-new-privileges:true']) assert.ok(dc.includes(s), s);
 });
+
+test('compose allows the family lab-proxy name by default, never the bare proxy name', () => {
+  const dc = fs.readFileSync(new URL('../docker-compose.yml', import.meta.url), 'utf8');
+  assert.match(dc, /LAB_ALLOWED_HOSTS: \$\{LAB_ALLOWED_HOSTS:-attack-gallery\.local\.ping-devops\.com\}/);
+});
