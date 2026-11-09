@@ -11,7 +11,7 @@ import { governed, ungoverned } from '../src/policy.js';
 import { isPublicAddress } from '../src/ipguard.js';
 
 test('bind: loopback by default; a non-loopback host is refused unless GALLERY_BIND is set', () => {
-  assert.deepEqual(resolveBind({}), { host: '127.0.0.1', port: 5181, allowedHosts: [] });
+  assert.deepEqual(resolveBind({}), { host: '127.0.0.1', port: 5181, allowedHosts: [], labHosts: [] });
   assert.equal(resolveBind({ GALLERY_HOST: 'localhost' }).host, 'localhost');
   for (const h of ['0.0.0.0', '192.168.1.5', '::', 'example.com']) assert.throws(() => resolveBind({ GALLERY_HOST: h }), /loopback only/, h);
   assert.equal(resolveBind({ GALLERY_HOST: '0.0.0.0', GALLERY_BIND: '1' }).host, '0.0.0.0');

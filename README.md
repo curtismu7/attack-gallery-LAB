@@ -103,6 +103,14 @@ docker compose down
 
 The compose file publishes `127.0.0.1` only (`scripts/compose.test.mjs` pins it). The image is Node 22, non-root, read-only filesystem, all capabilities dropped. `scripts/live-check.mjs` verifies a running instance, host or container, by content: health is `ready`, the page is served, each of the ten attacks run in both modes succeeds ungoverned and is refused by its named control governed, and everything returned passes the safety scan.
 
+### Host check and same-origin writes
+
+A local run answers loopback Host headers plus each `LAB_ALLOWED_HOSTS` name (comma-separated, no port) on `GALLERY_PORT`; every
+other Host gets 403. Docker defaults `LAB_ALLOWED_HOSTS` to `attack-gallery.local.ping-devops.com`, the Host the family lab-proxy
+(`https://local.ping-devops.com:8443/attack-gallery/`) sends. A write with an Origin header is accepted only from the loopback origin
+matching Host, or, on a `LAB_ALLOWED_HOSTS` Host only, when Origin equals `X-Forwarded-Proto://X-Forwarded-Host` (the proxy's own
+origin). Every other Origin gets 403. Every attack runs inside the app, so no endpoint is left open to other sites.
+
 ### Hosting the mock
 
 A hosted copy (for example on a cluster) needs three explicit settings; none is on by default, and the local defaults stay loopback:

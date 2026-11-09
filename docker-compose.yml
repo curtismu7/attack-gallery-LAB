@@ -13,6 +13,9 @@ services:
       GALLERY_PORT: "5181"
       GALLERY_HOST: 0.0.0.0
       GALLERY_BIND: "1"
+      # Extra Host names besides loopback; every other Host is refused. The default is the name the family lab-proxy
+      # (https://local.ping-devops.com:8443/attack-gallery/) sends in Host.
+      LAB_ALLOWED_HOSTS: ${LAB_ALLOWED_HOSTS:-attack-gallery.local.ping-devops.com}
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
