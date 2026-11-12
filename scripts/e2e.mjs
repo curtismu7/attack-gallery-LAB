@@ -146,13 +146,13 @@ try {
 
   // dark theme and narrow width
   await go('attack/issuer-mixup'); await page.getByRole('button', { name: 'Launch both' }).click(); await page.getByTestId('side-governed').getByTestId('flag').waitFor();
-  await page.getByTestId('theme').selectOption('dark');
+  await page.getByTestId('theme-select').selectOption('dark');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor); check(bg === 'rgb(5, 23, 39)', `dark theme applied (body ${bg})`); await shot('attack-dark');
   for (const hash of ['gallery', 'diagram', 'compare']) { await go(hash); await sleep(500); await shot(`dark-${hash}`); }
   const dark = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' }); const dp = await dark.newPage();
   await dp.goto(`${base}/#/gallery`); await dp.getByTestId('card-wrong-scope').waitFor();
   check((await dp.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(5, 23, 39)', 'dark system preference is followed'); await dark.close();
-  await page.getByTestId('theme').selectOption('light');
+  await page.getByTestId('theme-select').selectOption('light');
   await page.setViewportSize({ width: 375, height: 800 });
   for (const hash of ['gallery', 'attack/audience-confusion', 'controls', 'compare', 'asi', 'stories', 'diagram', 'limits']) {
     await go(hash); await sleep(400);
