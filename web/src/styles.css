@@ -1,9 +1,10 @@
+html { font-size: var(--fs, 16px); }
 a, a:visited { color: var(--status-info); }
 code { font-size: .9em; background: var(--surface-2); padding: 0 .25em; border-radius: 3px; overflow-wrap: anywhere; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .skip { position: absolute; left: .5rem; top: -4rem; background: var(--surface); color: var(--text); padding: .5rem .75rem; border: 2px solid var(--accent); border-radius: 6px; z-index: 50; }
 .skip:focus { top: .5rem; }
-.top { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--border); }
+.top { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem 1.25rem; padding: .6rem 1rem; background: var(--surface); border-bottom: 1px solid var(--border); }
 .brand { border-left: 4px solid var(--accent); padding-left: .6rem; }
 .top nav ul { display: flex; flex-wrap: wrap; gap: .25rem; list-style: none; margin: 0; padding: 0; }
 .top nav a { display: inline-block; padding: .5rem .7rem; border-radius: 6px; color: var(--text); text-decoration: none; min-height: 2.5rem; }

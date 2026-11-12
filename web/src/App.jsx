@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { getControls, getHealth, getInfo, setMode } from './api.js';
+import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
-import ModeToggle from './components/ModeToggle.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
-import { PresentBar, PresentProvider, PresentToggle } from './present/PresentMode.jsx';
+import { PresentBar, PresentProvider, PresentToggle, usePresent } from './present/PresentMode.jsx';
 import GalleryPage from './pages/GalleryPage.jsx';
 import AttackPage from './pages/AttackPage.jsx';
 import ControlsPage from './pages/ControlsPage.jsx';
@@ -30,15 +30,35 @@ function useTheme() {
   const setThemePersist = (t) => { setTheme(t); try { if (t && t !== 'auto') localStorage.setItem(THEME_KEY, t); else localStorage.removeItem(THEME_KEY); } catch { /* not remembered */ } };
   return [theme, setThemePersist];
 }
+const FONT_KEY = 'gallery.font';
+const readFont = () => { try { const f = localStorage.getItem(FONT_KEY); return ['S', 'M', 'L'].includes(f) ? f : 'M'; } catch { return 'M'; } };
+const saveFont = (f) => { try { localStorage.setItem(FONT_KEY, f); } catch { /* not remembered */ } };
+
+function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep }) {
+  const { present, set: setPresent } = usePresent();
+  return (
+    <TopMenu
+      mode={{ value: modeInfo?.source || 'mock', onChange: selectMode, realAvailable: modeInfo ? modeInfo.realAvailable : null, realHint: modeInfo?.hosted ? 'The hosted build is Mock only.' : 'This gallery has no live version: every party is a mock inside this app and nothing leaves the machine.' }}
+      theme={{ value: theme, onChange: setThemePersist }}
+      fontSize={{ value: fontStep, onChange: setFontStep }}
+      present={{ active: present, onToggle: () => setPresent(!present), label: 'Present' }}
+      help={{ href: 'https://github.com/curtismu7/attack-gallery-LAB#readme' }}
+    >
+      <ShelfLink />
+    </TopMenu>
+  );
+}
 
 export default function App() {
   const { name, arg } = useRoute();
   const [theme, setThemePersist] = useTheme();
+  const [fontStep, setFontStep] = useState(readFont);
   const ctl = useLoad(getControls);
   const [mockOnly, setMockOnly] = useState(false);
   const [modeInfo, setModeInfo] = useState(null);
   useEffect(() => { getHealth().then((h) => setMockOnly(h.mode === 'mock-only')).catch(() => {}); }, []);
   useEffect(() => { getInfo().then(setModeInfo).catch(() => {}); }, []);
+  useEffect(() => { applyFontSize(fontStep); saveFont(fontStep); }, [fontStep]);
   // Rule 19: the toggle asks the server; a refusal keeps the current mode on screen.
   const selectMode = async (source) => { try { setModeInfo(await setMode(source)); } catch { /* keep showing the current mode */ } };
   const first = useRef(true);
@@ -66,14 +86,8 @@ export default function App() {
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
         <div className="top__tools">
-            <ShelfLink /><ModeToggle info={modeInfo} onSelect={selectMode} /><PresentToggle />
-            <label className="inline">Theme
-              <select value={theme} onChange={(e) => setThemePersist(e.target.value)} data-testid="theme">
-                <option value="auto">Auto</option>
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-              </select>
-            </label></div>
+            <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} />
+          </div>
       </header>
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>

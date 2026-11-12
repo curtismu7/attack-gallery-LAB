@@ -52,7 +52,7 @@ describe('shell', () => {
   });
   it('the theme button flips light and dark', async () => {
     render(<App />); await screen.findByRole('heading', { name: 'Attack gallery' });
-    const sel = screen.getByTestId('theme');
+    const sel = screen.getByTestId('theme-select');
     fireEvent.change(sel, { target: { value: 'dark' } }); expect(document.documentElement.dataset.theme).toBe('dark');
   });
   it('presenter mode toggles, enlarges type and hides admin-only blocks', async () => {
