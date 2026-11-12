@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { getControls, getHealth, getInfo, setMode } from './api.js';
+import { getControls, getHealth, getInfo, resetKeys, setMode } from './api.js';
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
@@ -34,7 +34,7 @@ const FONT_KEY = 'gallery.font';
 const readFont = () => { try { const f = localStorage.getItem(FONT_KEY); return ['S', 'M', 'L'].includes(f) ? f : 'M'; } catch { return 'M'; } };
 const saveFont = (f) => { try { localStorage.setItem(FONT_KEY, f); } catch { /* not remembered */ } };
 
-function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep }) {
+function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset }) {
   const { present, set: setPresent } = usePresent();
   return (
     <TopMenu
@@ -43,6 +43,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
       fontSize={{ value: fontStep, onChange: setFontStep }}
       present={{ active: present, onToggle: () => setPresent(!present), label: 'Present' }}
       help={{ href: 'https://github.com/curtismu7/attack-gallery-LAB#readme' }}
+      onReset={onReset}
     >
       <ShelfLink />
     </TopMenu>
@@ -61,6 +62,9 @@ export default function App() {
   useEffect(() => { applyFontSize(fontStep); saveFont(fontStep); }, [fontStep]);
   // Rule 19: the toggle asks the server; a refusal keeps the current mode on screen.
   const selectMode = async (source) => { try { setModeInfo(await setMode(source)); } catch { /* keep showing the current mode */ } };
+  // Reset (rule 3): the server mints a fresh keyring; the next run uses the new keys.
+  const [resetNote, setResetNote] = useState('');
+  const reset = async () => { try { await resetKeys(); setResetNote('Reset: the mock keyring is fresh; the next attack run is signed with the new keys.'); } catch { setResetNote('Reset failed.'); } };
   const first = useRef(true);
   // On a route change (not the first load) move focus to main so keyboard and screen reader users land on the new page.
   useEffect(() => { document.title = 'Agent Attack Gallery'; if (first.current) { first.current = false; return; } document.getElementById('main')?.focus?.({ preventScroll: true }); window.scrollTo?.(0, 0); }, [name, arg]);
@@ -86,12 +90,13 @@ export default function App() {
         <strong className="brand">Agent Attack Gallery</strong>
         <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
         <div className="top__tools">
-            <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} />
+            <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} />
           </div>
       </header>
       {mockOnly
         ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
         : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
+      {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
       {hasClaim(name) && <ClaimBanner />}
       <main id="main" tabIndex={-1} className="page">
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>

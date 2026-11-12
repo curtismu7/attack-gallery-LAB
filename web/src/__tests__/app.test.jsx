@@ -156,7 +156,7 @@ describe('diagram', () => {
     const out = await screen.findByTestId('diagram-outcome', {}, { timeout: 4000 });
     expect(out).toHaveTextContent(/iss_mismatch/); expect(screen.getByTestId('ctrl-iss_check')).toHaveClass('dctrl--stopped');
     expect(screen.getAllByText(/does not happen: stopped earlier/).length).toBe(3);
-    fireEvent.click(screen.getByRole('button', { name: 'Reset' })); expect(screen.queryByTestId('diagram-outcome')).toBeNull();
+    fireEvent.click(within(screen.getByRole('main')).getByRole('button', { name: 'Reset' })); expect(screen.queryByTestId('diagram-outcome')).toBeNull();
   });
   it('the governed SSRF simulation runs hops 2-4 and refuses each, like the real run', async () => {
     go('#/diagram'); await screen.findByTestId('hops');
