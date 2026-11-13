@@ -110,7 +110,7 @@ try {
   check((await page.getByTestId('diagram-outcome').innerText()).includes('iss_mismatch'), 'diagram: governed simulation stops at the iss check');
   check((await page.getByTestId('hopnum-3').getAttribute('class')).includes('hopnum--stop') && (await page.getByTestId('hopnum-1').getAttribute('class')).includes('hopnum--on'), 'diagram: hop badges light up and the stopping hop turns red');
   await shot('diagram-governed');
-  await page.getByRole('button', { name: 'Reset' }).click(); check((await page.getByTestId('diagram-outcome').count()) === 0, 'diagram: Reset clears the run');
+  await page.getByRole('button', { name: 'Reset' }).last().click(); check((await page.getByTestId('diagram-outcome').count()) === 0, 'diagram: Reset clears the run');
   { // ReactFlow applies a controlled node position one render after the click (the transform is written from its own store), so a single read right after Reset can still see the dragged position. Poll until it settles.
     let b2 = await node.boundingBox();
     for (let i = 0; i < 40 && !(Math.abs(b2.x - b0.x) < 2 && Math.abs(b2.y - b0.y) < 2); i++) { await sleep(50); b2 = await node.boundingBox(); }
