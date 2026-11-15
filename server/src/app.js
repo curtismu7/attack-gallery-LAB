@@ -58,6 +58,20 @@ export async function createApp({ mockOnly = isMockOnly(), allowedHosts = [], la
   if (mockOnly) app.use(['/api/run', '/api/matrix'], createLimiter(limits));
   let matrixCache; // mock-only: the matrix is deterministic and /api/reset is refused, so compute it once
 
+
+  // One real gateway check: tools/list through the door, then the gateway's refusal for a tool nothing grants.
+  app.post('/api/gateway-check', async (req, res) => {
+    const door = realDoorFrom();
+    if (!door) return res.status(409).json({ error: 'conflict', message: NO_REAL });
+    if (req.body && Object.keys(req.body).some((k) => !['app', 'caller'].includes(k))) return res.status(400).json({ error: 'bad_request', message: 'the only accepted body fields are { "app", "caller" }' });
+    const app = String(req.body?.app || door.apps[0]);
+    if (!door.apps.includes(app)) return res.status(400).json({ error: 'bad_app', message: `app must be one of ${door.apps.join(', ')}` });
+    const caller = req.body?.caller && door.callers.some((c) => c.id === req.body.caller) ? req.body.caller : door.callers[0].id;
+    const listing = await door.list(app, caller);
+    const out = { app, caller, gateway: door.origin, listing };
+    if (listing.ok) out.refusal = await door.call(app, caller, 'attack_gallery_refusal_probe_tool', {});
+    res.json(out);
+  });
   app.get('/api/catalog', (req, res) => res.json({ packs: [{ id: 1, name: 'Pack 1: token and identity attacks' }, { id: 2, name: 'Pack 2: MCP authorization attacks' }], attacks: ATTACKS.map(publicAttack) }));
   // The slide-55 OWASP ASI table as qualified, with the lab's attack mapping. A Ping release claim, UNVERIFIED on our tenant (see asi.js).
   app.get('/api/asi', (req, res) => res.json(asiTable()));
