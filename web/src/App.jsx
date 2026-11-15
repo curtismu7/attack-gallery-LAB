@@ -13,6 +13,7 @@ import StoriesPage from './pages/StoriesPage.jsx';
 import DiagramPage from './pages/DiagramPage.jsx';
 import AsiPage from './pages/AsiPage.jsx';
 import ShelfLink from "./components/ShelfLink.jsx";
+import VerifyMark from "./components/VerifyMark.jsx";
 
 const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
 const THEME_KEY = 'gallery.theme';
@@ -46,6 +47,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
       onReset={onReset}
     >
       <ShelfLink />
+      <VerifyMark id="attack-gallery" />
     </TopMenu>
   );
 }
