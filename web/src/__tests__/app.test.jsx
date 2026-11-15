@@ -3,6 +3,7 @@ import { render, screen, waitFor, within, fireEvent } from '@testing-library/rea
 import { readFileSync } from 'node:fs';
 import App from '../App.jsx';
 import { Trail, Outcome } from '../components/RunPanel.jsx';
+import { setJsonView } from '../components/JsonPane.jsx';
 import { startApi } from './helpers.js';
 import { ATTACKS } from '../../../server/src/catalog.js';
 import { CHIP_COLS, CHIP_W, HOPS, chipPosition, hopsToRun } from '../data/diagram.js';
@@ -11,7 +12,7 @@ let api;
 beforeAll(() => { api = startApi(); });
 afterAll(() => api.stop());
 const go = (hash) => { window.location.hash = hash; return render(<App />); };
-beforeEach(() => { window.location.hash = ''; });
+beforeEach(() => { window.location.hash = ''; setJsonView('form'); });
 
 describe('shell', () => {
   it('has a skip link first, a nav, the all-mocks banner, and the gallery by default', async () => {
@@ -200,13 +201,29 @@ describe('diagram data', () => {
 describe('inert text: hostile strings never execute or become markup', () => {
   const evil = '<img src=x onerror="window.__pwned=1"><script>window.__pwned=2</script>';
   it('claims, labels, requests, gain and refusal render as plain text', () => {
-    window.__pwned = undefined;
-    const trace = [{ n: 1, step: 's', actor: evil, label: evil, verdict: 'ok', request: { op: evil, token: { claims: { sub: evil, aud: evil, act: { sub: evil } } } }, response: { body: evil } }];
-    const run = { succeeded: true, gain: evil, policy: { c: false }, trace };
-    const { container } = render(<><Outcome run={run} control={{ id: 'c', name: 'C' }} controls={[]} /><Trail trace={trace} /><Outcome run={{ succeeded: false, policy: { c: true }, refusal: { control: 'c', error: evil, message: evil, status: 403 }, trace: [] }} control={{ id: 'c', name: evil }} controls={[]} /></>);
-    expect(container.querySelector('img, script, iframe')).toBeNull();
-    expect(container.textContent).toContain('<img src=x onerror=');
-    expect(container.querySelectorAll('[onerror]')).toHaveLength(0); expect(window.__pwned).toBeUndefined();
+    for (const view of ['form', 'raw']) { // hostile text stays inert in both JsonPane views
+      setJsonView(view);
+      window.__pwned = undefined;
+      const trace = [{ n: 1, step: 's', actor: evil, label: evil, verdict: 'ok', request: { op: evil, token: { claims: { sub: evil, aud: evil, act: { sub: evil } } } }, response: { body: evil } }];
+      const run = { succeeded: true, gain: evil, policy: { c: false }, trace };
+      const { container, unmount } = render(<><Outcome run={run} control={{ id: 'c', name: 'C' }} controls={[]} /><Trail trace={trace} /><Outcome run={{ succeeded: false, policy: { c: true }, refusal: { control: 'c', error: evil, message: evil, status: 403 }, trace: [] }} control={{ id: 'c', name: evil }} controls={[]} /></>);
+      expect(container.querySelector('img, script, iframe'), view).toBeNull();
+      expect(container.textContent, view).toContain('<img src=x onerror=');
+      expect(container.querySelectorAll('[onerror]'), view).toHaveLength(0); expect(window.__pwned, view).toBeUndefined();
+      unmount();
+    }
+  });
+  it('the trail shows decoded claims and the redacted request / response as JsonPanes; the removed token is not an empty row', () => {
+    setJsonView('form');
+    const trace = [{ n: 1, step: 's', actor: 'gateway', label: 'call', verdict: 'ok', request: { tool: 'get_account', args: { accountId: 'acc-2001' }, token: { claims: { sub: 'user-1', aud: 'gw', scope: 'accounts:read', exp: 1900000000, jti: 'j' } } }, response: { status: 200, body: { account: { id: 'acc-2001' } } } }];
+    const { container } = render(<Trail trace={trace} />);
+    const [claims, redacted] = container.querySelectorAll('.jsonbox');
+    expect(claims).toHaveAttribute('data-view', 'form');
+    expect([...claims.querySelectorAll('.jform__k')].map((n) => n.textContent)).toEqual(['sub', 'aud', 'scope', 'exp']); // jti stays out, as before
+    expect([...redacted.querySelectorAll('.jform__k')].map((n) => n.textContent)).not.toContain('token');
+    expect(redacted.querySelector('.jform__row[data-hot="true"] > .jform__k').textContent).toBe('tool');
+    fireEvent.click(within(redacted).getByRole('button', { name: 'JSON' }));
+    expect(redacted.querySelector('pre.json--raw').textContent).not.toContain('"token"');
   });
   it('the index page ships no inline script', () => {
     const html = readFileSync('index.html', 'utf8');

@@ -48,10 +48,11 @@ h2 { font-size: 1.25rem; margin: 1.5rem 0 .5rem; } h3 { font-size: 1.05rem; marg
 .trail__head { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin: 0; }
 .trail__n { display: inline-grid; place-items: center; width: 1.5rem; height: 1.5rem; border-radius: 50%; background: var(--text); color: var(--bg); font-size: .8rem; font-weight: 700; }
 .trail__label { margin: .25rem 0; }
-.claims { display: grid; gap: .1rem; margin: .3rem 0; font-size: .85rem; }
-.claims div { display: grid; grid-template-columns: 4.5rem 1fr; gap: .5rem; } .claims dt { color: var(--muted); } .claims dd { margin: 0; font-family: var(--font-mono); overflow-wrap: anywhere; }
+/* JSON panes (JsonPane.css has the colours and the full view); this is only the lab's own box. */
+.json { margin: .3rem 0; background: var(--surface-2); border-radius: 6px; }
+.json--raw { padding: .6rem; font-size: .8rem; line-height: 1.4; }
 details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-height: 1.5rem; }
-.code { margin: .3rem 0; padding: .6rem; background: var(--surface-2); border-radius: 6px; overflow-x: auto; font-size: .8rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
+.code { margin: .3rem 0; padding: .6rem; background: var(--surface-2); border-radius: 6px; font-size: .8rem; line-height: 1.4; white-space: pre-wrap; overflow-wrap: anywhere; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); }
 .table { border-collapse: collapse; width: 100%; font-size: .9rem; }
 .table th, .table td { text-align: left; vertical-align: top; padding: .5rem .7rem; border-bottom: 1px solid var(--border); }
@@ -88,15 +89,15 @@ details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-h
 .wire__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr)); gap: 1rem; }
 .wire__msg { min-width: 0; }
 .wire__pre { margin: 0; }
-.wire__pre--ok { border-left: 4px solid var(--status-ok); } .wire__pre--bad { border-left: 4px solid var(--danger-text); }
+.wire__box { min-width: 0; }
+.wire__box--ok { border-left: 4px solid var(--status-ok); } .wire__box--bad { border-left: 4px solid var(--danger-text); }
 .wire__hl { background: var(--surface-2); color: var(--text); outline: 1px solid var(--status-warn); border-radius: 3px; padding: 0 .1rem; cursor: help; }
 .wire__none { padding: .6rem .8rem; border: 1px dashed var(--border); border-radius: 6px; }
-.wire__jwt { margin: .3rem 0; padding: .6rem; background: var(--surface-2); border-radius: 6px; font-size: .8rem; line-height: 1.5; overflow-wrap: anywhere; word-break: break-all; }
-.wire__p--h { background: var(--accent-soft); } .wire__p--p { background: var(--surface); } .wire__p--s { border-bottom: 2px solid var(--status-warn); }
 .wire__table td, .wire__table th { vertical-align: top; }
 .wire__row--hot td { background: var(--surface-2); }
 .wire__notice { margin: .8rem 0 0; padding: .6rem .8rem; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
 .wire__table td:first-child { white-space: nowrap; }
+.wire__table .jform__row { grid-template-columns: minmax(0, 1fr); } /* a claim that is an object (act) sits in a narrow table cell: key over value, so the Form view fits */
 
 /* Release-claim banner, source tags and ASI mapping (slide 55). Tokens only. */
 .banner--claim { background: var(--accent-soft); }

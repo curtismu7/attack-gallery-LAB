@@ -2,6 +2,10 @@
 // Everything is built from the simulated parties' own trace (decoded header and claims). The compact token is rebuilt here
 // with the fixed signature `sig-not-real`: the server never returns, and no one ever holds, a real signed token.
 export const SIGNATURE = 'sig-not-real';
+// Keys that matter in this lab's payloads, marked on every JSON pane (the JsonPane defaults sub, act, aud, scope, azp, iss ... are already hot):
+// the tool a call names, the object it asks for, the backend's copy of the token, the consent question, the issuer a server advertises,
+// the pointer a hostile server hands out and what the SSRF probes read back (all fake).
+export const HOT_KEYS = ['tool', 'accountId', 'upstreamToken', 'consent_page_shown_to_user', 'issuer', 'authorization_response_iss_parameter_supported', 'authorization_servers', 'AccessKeyId', 'admin', 'internal'];
 const HOST = { gateway: 'gw.gallery.example', goodAs: 'as.gallery.example', evilAs: 'evil-as.invalid', proxy: 'proxy.gallery.example', callback: 'app.gallery.example' };
 const STATUS_TEXT = { 200: 'OK', 201: 'Created', 302: 'Found', 400: 'Bad Request', 401: 'Unauthorized', 403: 'Forbidden', 404: 'Not Found' };
 const b64url = (o) => btoa(JSON.stringify(o)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

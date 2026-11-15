@@ -2,6 +2,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 import { render, screen, waitFor, within, fireEvent } from '@testing-library/react';
 import App from '../App.jsx';
 import WirePanel from '../components/WirePanel.jsx';
+import { setJsonView } from '../components/JsonPane.jsx';
 import { startApi } from './helpers.js';
 import { ATTACKS } from '../../../server/src/catalog.js';
 import { SIGNATURE, compact } from '../wire/wire.js';
@@ -9,7 +10,8 @@ import { SIGNATURE, compact } from '../wire/wire.js';
 let api;
 beforeAll(() => { api = startApi(); });
 afterAll(() => api.stop());
-beforeEach(() => { window.location.hash = ''; });
+// The Form | JSON choice is shared module state: these tests read the JSON text, so they pick the JSON view (the Form view has its own tests below).
+beforeEach(() => { window.location.hash = ''; setJsonView('raw'); });
 const post = (attackId, mode) => fetch('/api/run', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ attackId, mode }) }).then((r) => r.json());
 
 describe('On the wire panel', () => {
@@ -57,6 +59,35 @@ describe('On the wire panel', () => {
     const { runs } = await post('rogue-actor', 'ungoverned');
     const { container } = render(<WirePanel attack={attack} entry={runs[0].trace.at(-1)} />);
     expect(container.querySelector('mark').textContent).toBe('X-Actor-Client: agent-ok');
+  });
+
+  it('a JSON body goes through the shared JsonPane (Form | JSON, coloured, nothing scrolls); the headers stay text with the deciding one marked', async () => {
+    const attack = ATTACKS.find((a) => a.id === 'other-account');
+    const { runs } = await post('other-account', 'ungoverned');
+    const { container } = render(<WirePanel attack={attack} entry={runs[0].trace.at(-1)} />);
+    const req = within(container).getByTestId('wire-request');
+    expect(req.querySelector('pre.code').textContent).toMatch(/^POST https:\/\/gw\.gallery\.example\/mcp HTTP\/1\.1/);
+    expect(req.querySelector('pre.code').textContent).not.toContain('"jsonrpc"');
+    const box = req.querySelector('.jsonbox');
+    expect([...box.querySelectorAll('.jsonbox__toggle button')].map((b) => b.textContent)).toEqual(['Form', 'JSON']);
+    expect(box.querySelector('pre.json--raw').textContent).toContain('"accountId": "acc-2001"');
+    expect(box.querySelector('.jtok--hot').textContent).toContain('accountId');
+    setJsonView('form');
+    fireEvent.click(box.querySelector('.jsonbox__toggle button')); // Form
+    const row = [...req.querySelectorAll('.jform__row')].find((r) => r.querySelector('.jform__k').textContent === 'accountId');
+    expect(row).toHaveAttribute('data-hot', 'true');
+    expect(row.querySelector('.jform__d').textContent).toBe('acc-2001');
+  });
+
+  it('the token is one coloured three-part pane and a claim that is an object (act) is a JsonPane, not JSON text in a code box', async () => {
+    const attack = ATTACKS.find((a) => a.id === 'rogue-actor');
+    const { runs } = await post('rogue-actor', 'ungoverned');
+    const { container } = render(<WirePanel attack={attack} entry={runs[0].trace.at(-1)} />);
+    const jwt = container.querySelector('[data-testid="wire-jwt"]');
+    expect(jwt.querySelectorAll('.jtok--jwt1, .jtok--jwt2, .jtok--jwt3')).toHaveLength(3);
+    const act = [...container.querySelectorAll('[data-testid="wire-claims"] tbody tr')].find((r) => r.querySelector('code').textContent === 'act');
+    expect(act.querySelector('.jsonbox pre.json--raw').textContent).toContain('"sub": "agent-rogue"');
+    expect(act.querySelector('td:nth-child(2) code')).toBeNull();
   });
 
   it('a step with no traffic says so plainly', async () => {

@@ -1,21 +1,19 @@
 // One side of an attack: the numbered request/response trail, what the attacker gained, or the refusal.
 // Every string below comes from the API and is rendered as React text children (inert): nothing is ever parsed as HTML.
 import { useState } from 'react';
+import Json from './JsonPane.jsx';
 import WirePanel from './WirePanel.jsx';
+import { HOT_KEYS } from '../wire/wire.js';
 
 const CLAIM_ORDER = ['iss', 'sub', 'aud', 'scope', 'azp', 'act', 'exp'];
-const show = (v) => (typeof v === 'object' ? JSON.stringify(v) : String(v));
 
 export function Claims({ token }) {
   if (!token?.claims) return null;
   const keys = [...CLAIM_ORDER.filter((k) => k in token.claims), ...Object.keys(token.claims).filter((k) => !CLAIM_ORDER.includes(k) && !['jti', 'iat', 'client_id'].includes(k))];
-  return (
-    <dl className="claims" aria-label="Decoded token claims (redacted: the compact token is never shown)">
-      {keys.map((k) => <div key={k}><dt>{k}</dt><dd>{show(token.claims[k])}</dd></div>)}
-    </dl>
-  );
+  return <Json value={Object.fromEntries(keys.map((k) => [k, token.claims[k]]))} label="Decoded token claims (redacted: the compact token is never shown)" hot={HOT_KEYS} />;
 }
-const pretty = (o) => JSON.stringify(o, null, 2);
+// The compact token never leaves the server; drop the key (not just its value) so the Form view does not list an empty "token" row.
+const noToken = (o) => { const { token, ...rest } = o || {}; return rest; };
 const VERDICT = { ok: 'accepted', refused: 'refused', info: 'info' };
 
 // attack (optional): with it, each step gets an "On the wire" button that opens the request, response and decoded token.
@@ -33,7 +31,7 @@ export function Trail({ trace, attack }) {
             <Claims token={token} />
             <details data-admin-only>
               <summary>Request and response (redacted)</summary>
-              <pre className="code">{pretty({ request: { ...t.request, token: undefined }, response: { ...t.response, token: undefined } })}</pre>
+              <Json value={{ request: noToken(t.request), response: noToken(t.response) }} label="Request and response (redacted)" hot={HOT_KEYS} />
             </details>
             {attack && (<>
               <button type="button" aria-expanded={open.has(t.n)} onClick={() => toggle(t.n)} data-testid={`wire-btn-${t.n}`}>{open.has(t.n) ? 'Hide' : 'Show'} on the wire</button>
