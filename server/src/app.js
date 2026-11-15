@@ -10,6 +10,18 @@ import { asiForAttack, asiTable } from './asi.js';
 import { isMockOnly, mockOnlyGuard, createLimiter, limitsFromEnv, hostGuard } from './mockonly.js';
 import { shelfInfo } from './shelfLink.js';
 import { makeHostGuard, makeOriginGuard, proxyHostSet } from './sameorigin.js';
+import { readFileSettings, doorConfig, createRealDoor } from './gatewayReal.js';
+
+// Real mode = the shared gateway hop: an agent key from the shared settings file calling a live Privilege door.
+// The environment wins over the file: AGA_* variables overlay the parsed file text.
+export function realDoorFrom(env = process.env) {
+  const p = env.STANDALONE_ENV || `${env.HOME || ''}/Development/.env`;
+  let text = '';
+  try { text = fs.readFileSync(p, 'utf8'); } catch { /* the environment may still carry the keys */ }
+  for (const [k, v] of Object.entries(env)) if (k.startsWith('AGA_GW_') && v) text += `\n${k}=${v}`;
+  const cfg = doorConfig(text, 'AGA');
+  return cfg.ok ? createRealDoor({ config: cfg, clientInfo: { name: 'attack-gallery', version: '0.1.0' } }) : null;
+}
 
 const MODES = ['ungoverned', 'governed', 'both'];
 const publicAttack = ({ id, name, pack, goal, story, control, steps, refs, expected }) => ({ id, name, pack, goal, story, control, steps, references: refs, expected, asi: asiForAttack(id) });
