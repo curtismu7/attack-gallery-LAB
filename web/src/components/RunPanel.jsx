@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Json from './JsonPane.jsx';
 import WirePanel from './WirePanel.jsx';
+import GatewayTrace from '../gateway-trace/GatewayTrace.jsx';
 import { HOT_KEYS } from '../wire/wire.js';
 
 const CLAIM_ORDER = ['iss', 'sub', 'aud', 'scope', 'azp', 'act', 'exp'];
@@ -42,6 +43,14 @@ export function Trail({ trace, attack }) {
       })}
     </ol>
   );
+}
+
+// "What Privilege did" (Rule 25): every call this run made to the gallery's gateway, with the decisions it made. Mock only, so always simulated.
+const GATEWAY_NOTE = "Simulated: this lab's own in-process gateway (not a Privilege product) runs these checks in this order, so every decision here is what it computed. A control that is OFF in this run shows as information, never as passed. The token is not shown here, only its length: its decoded claims are in the trail above.";
+export function GatewayCalls({ run }) {
+  const exchanges = run.trace.filter((t) => t.gateway).map((t) => ({ step: t.n, title: `${t.label}`, status: t.gateway.response.status, trace: t.gateway }));
+  if (!exchanges.length) return <p className="muted small" data-testid="gateway-none">No call reached the gateway in this run: the mock authorization server, the client or the MCP proxy decided it.</p>;
+  return <GatewayTrace exchanges={exchanges} source="mock" basisNote={GATEWAY_NOTE} />;
 }
 
 export function Outcome({ run, control, controls }) {

@@ -4,6 +4,7 @@ import { describeToken, tokenId } from './keys.js';
 import { USERS, CLIENTS, URLS } from './world.js';
 import { SsrfBlocked } from './ssrf.js';
 import { controlById } from './policy.js';
+import { gatewayExchange } from './galleryTrace.js';
 
 const PERSONA_AUD = { gateway: URLS.gateway, billing: URLS.billing };
 const clip = (v) => (typeof v === 'string' && v.length > 400 ? `${v.slice(0, 400)}...` : v);
@@ -32,7 +33,7 @@ const STEPS = {
     const headers = { authorization: `Bearer ${token}`, ...(step.headers || {}) };
     const r = await S.world.gateway.handle({ tool: step.tool, args: step.args, headers });
     S.last = r; S.lastCall = r;
-    push(S, step, { actor: 'gateway', request: { tool: step.tool, args: step.args, headers: redactHeaders(headers), token: view(token) }, response: clipDeep({ status: r.status, ...(r.ok ? { body: r.body } : { error: r.error, error_description: r.error_description, www_authenticate: r.wwwAuthenticate }), notes: r.events?.length ? r.events : undefined }), verdict: r.ok ? 'ok' : 'refused', control: r.control });
+    push(S, step, { actor: 'gateway', request: { tool: step.tool, args: step.args, headers: redactHeaders(headers), token: view(token) }, response: clipDeep({ status: r.status, ...(r.ok ? { body: r.body } : { error: r.error, error_description: r.error_description, www_authenticate: r.wwwAuthenticate }), notes: r.events?.length ? r.events : undefined }), verdict: r.ok ? 'ok' : 'refused', control: r.control, gateway: gatewayExchange({ tool: step.tool, args: step.args, headers, bearer: token, r }) });
     if (!r.ok && r.control) refuse(S, step, r); else if (!r.ok) S.halted = true;
     noteEvents(S, step, r.events);
   },
@@ -43,7 +44,7 @@ const STEPS = {
     S.tokens.captured = captured;
     const r = await w.gateway.handle({ tool: step.tool, args: step.args, headers: { authorization: `Bearer ${captured}` } });
     S.last = r; S.replay = r;
-    push(S, step, { actor: 'billing backend operator', request: { tool: step.tool, headers: redactHeaders({ authorization: 1 }), token: view(captured) }, response: clipDeep({ status: r.status, ...(r.ok ? { body: r.body } : { error: r.error }) }), verdict: r.ok ? 'ok' : 'refused', control: r.control });
+    push(S, step, { actor: 'billing backend operator', request: { tool: step.tool, headers: redactHeaders({ authorization: 1 }), token: view(captured) }, response: clipDeep({ status: r.status, ...(r.ok ? { body: r.body } : { error: r.error }) }), verdict: r.ok ? 'ok' : 'refused', control: r.control, gateway: gatewayExchange({ tool: step.tool, args: step.args, headers: {}, bearer: captured, r }) });
   },
   async 'authz-start'(S, step) {
     const asUrl = URLS.evilAs;
