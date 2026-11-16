@@ -21,6 +21,14 @@ describe('shell', () => {
     expect(container.firstElementChild).toBe(container.querySelector('a.skip'));
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
     expect(screen.getByTestId('banner')).toHaveTextContent(/mocks/i); expect(screen.getByTestId('banner')).toHaveTextContent(/nothing leaves this machine/i);
+    // Page order (STANDALONE-UI-PATTERNS sections 1-2): skip link, the shell bar, then main with the simulation banner first.
+    const bar = container.querySelector('header.shell-bar');
+    expect(container.querySelector('a.skip').nextElementSibling).toBe(bar);
+    expect(bar.nextElementSibling).toBe(container.querySelector('main#main'));
+    expect(container.querySelector('main#main').firstElementChild).toBe(screen.getByTestId('banner'));
+    expect(within(bar).getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
+    expect(within(bar).getByRole('link', { name: 'Gallery' })).toHaveAttribute('aria-current', 'page');
+    expect(within(bar).getByTestId('top-menu')).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
   });
   it('shows the hosted-mock banner only when health reports mock-only', async () => {
