@@ -87,20 +87,24 @@ export default function App() {
   return (
     <PresentProvider>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-      <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
-      <header className="top">
-        <strong className="brand">Agent Attack Gallery</strong>
-        <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
-        <div className="top__tools">
-            <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} />
-          </div>
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">AG</span>
+          <strong>Agent Attack Gallery</strong>
+          {modeInfo?.source === 'real'
+            ? <span className="shell-badge shell-badge--real" data-testid="mode-badge">Real</span>
+            : <span className="shell-badge" data-testid="mode-badge">Mock</span>}
+        </span>
+        <nav className="shell-nav" aria-label="Main">{NAV.map(([id, label]) => <a key={id} href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a>)}</nav>
+        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} />
       </header>
-      {mockOnly
-        ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
-        : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
-      {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
-      {hasClaim(name) && <ClaimBanner />}
       <main id="main" tabIndex={-1} className="page">
+        {mockOnly
+          ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
+          : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
+        {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
+        {hasClaim(name) && <ClaimBanner />}
+        <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
     </PresentProvider>

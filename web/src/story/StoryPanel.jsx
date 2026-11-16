@@ -47,6 +47,7 @@ export default function StoryPanel({ story: raw }) {
       <ol className="story__steps">
         {story.steps.map((s) => (
           <li key={s.n} className={s.n === current.n ? 'is-current' : undefined}>
+            {/* ui-pattern: allow P9 the step buttons are step pickers that open one step's talk track (aria-current="step"), not a page action; the Stories page's action is the "Run the attack for this story" link, so no button is primary */}
             <button type="button" id={`gal-step-${s.n}`} className="story__step" aria-current={s.n === current.n ? 'step' : undefined} onClick={() => pickStep(s.n)}>
               <span className="story__n">{s.n}</span>{s.title}{blocked && s.blocked && <span className="story__tag">blocked</span>}
             </button>

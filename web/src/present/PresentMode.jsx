@@ -88,6 +88,7 @@ export function PresentBar({ claim = null }) {
     <div className="present-bar" role="toolbar" aria-label="Presenter controls">
       {steps.length > 0 && (
         <>
+          {/* ui-pattern: allow P9 these presenter-only toolbar controls (Previous, Next, Exit) are not a page action; Gallery, Controls, Limits, OWASP ASI and Stories have no action to make primary, only these and the story step pickers */}
           <button type="button" onClick={() => move(-1)} disabled={i <= 0}>Previous</button>
           <span className="present-bar__count" data-testid="present-count">Step {i + 1} of {steps.length}</span>
           <button type="button" onClick={() => move(1)} disabled={i >= steps.length - 1}>Next</button>
