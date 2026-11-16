@@ -73,58 +73,97 @@ export function createUpstream(keys) {
   return { seen, async handle(token) { await verifyAccessToken(token, keys.good); seen.push(token); return { statement: 'Statement ready' }; } };
 }
 
+// What the gateway decided, in the order it decides. handle() records one entry per check (pass, fail, or info for a control that is
+// OFF in this run) and fills the checks an earlier refusal never reached as 'skipped'. The lab's own simulation computed all of it.
+const GATEWAY_ORDER = ['authenticated', 'tool', 'audience_binding', 'client_allowlist', 'require_delegation', 'act_validation', 'scope_check', 'ownership_check', 'no_token_forwarding'];
+const GATEWAY_LABEL = { authenticated: 'Bearer token verified (baseline, always on)', tool: 'Tool exists' };
+const labelOf = (id) => GATEWAY_LABEL[id] || controlById(id).name;
+const appliesTo = (id, tool) => (id === 'ownership_check' ? Boolean(TOOLS[tool]?.objectArg) : id === 'no_token_forwarding' ? tool === 'sync_statement' : true);
+function completeDecisions(log, tool, r) {
+  const out = GATEWAY_ORDER.filter((id) => appliesTo(id, tool)).map((id) => log.find((d) => d.id === id) || { id, label: labelOf(id), outcome: 'skipped', evidence: 'not reached: an earlier check refused the call' });
+  // Every check passed (or was off) but the tool itself answered with an error (an unknown account, a bad amount).
+  if (!r.ok && !out.some((d) => d.outcome === 'fail')) out.push({ id: 'result', label: 'Tool result', outcome: 'fail', evidence: `the tool answered ${r.status} ${r.error}` });
+  return out;
+}
+
 export function createGateway({ keys, good, upstream, policy, accounts, audit }) {
+  async function run({ tool, args = {}, headers = {} }, note) {
+    // A control that is OFF in this run is not checked: shown as information, never as passed.
+    const check = (id, ok, pass, fail, off) => note(id, !policy[id] ? 'info' : ok ? 'pass' : 'fail', !policy[id] ? `OFF in this run, so not checked: ${off}` : ok ? pass : fail);
+    const events = [];
+    const m = /^Bearer (.+)$/.exec(headers.authorization || '');
+    if (!m) { note('authenticated', 'fail', 'No Authorization: Bearer header on the request.'); return { ok: false, status: 401, error: 'invalid_request', error_description: 'No bearer token.', events }; }
+    const bearer = m[1];
+    let claims;
+    try { claims = await verifyAccessToken(bearer, keys.good); } // baseline, always on: signature, issuer, expiry
+    catch (e) { note('authenticated', 'fail', `signature, issuer or expiry rejected: ${e.code || e.message}`); return { ok: false, status: 401, error: 'invalid_token', error_description: `Token rejected before any policy runs: ${e.code || e.message}.`, baseline: true, events }; }
+    note('authenticated', 'pass', 'signature, issuer and expiry are valid');
+    const t = TOOLS[tool];
+    if (!t) { note('tool', 'fail', `no tool named ${tool}`); return { ok: false, status: 404, error: 'unknown_tool', error_description: `No tool named ${tool}.`, events }; }
+    note('tool', 'pass', `${tool} exists`);
+    const auds = [].concat(claims.aud || []);
+    const audOk = auds.includes(URLS.gateway);
+    check('audience_binding', audOk, `aud ${JSON.stringify(auds)} names this gateway`, `aud ${JSON.stringify(auds)} does not name this gateway`, `aud is ${JSON.stringify(auds)}`);
+    if (policy.audience_binding && !audOk) return { ...refusal('audience_binding', { error_description: `${controlById('audience_binding').message} aud=${JSON.stringify(auds)}` }), events };
+    const clientOk = ALLOWED_CLIENTS.includes(claims.azp);
+    check('client_allowlist', clientOk, `azp ${claims.azp} is a registered client`, `azp ${claims.azp} is not a registered client`, `azp is ${claims.azp}`);
+    if (policy.client_allowlist && !clientOk) return { ...refusal('client_allowlist', { error_description: `${controlById('client_allowlist').message} azp=${claims.azp}` }), events };
+    if (t.agentMediated) check('require_delegation', claims.act != null, 'the token carries an act claim, so an agent acted for the user', 'the token has no act claim', `the token has ${claims.act == null ? 'no act claim' : 'an act claim'}`);
+    else note('require_delegation', 'info', 'not applicable: this tool is not agent-mediated');
+    if (policy.require_delegation && t.agentMediated && claims.act == null) return { ...refusal('require_delegation'), events };
+    let actor = claims.act?.sub ?? null;
+    const header = headers['x-actor-client'];
+    const actOk = !claims.act || ALLOWED_ACTORS.includes(claims.act.sub);
+    check('act_validation', actOk,
+      `${claims.act ? `act.sub ${claims.act.sub} is an allowed actor` : 'no act claim, so no actor to validate'}${header ? `; the caller-supplied X-Actor-Client=${header} was ignored: the actor comes from the signed token only` : ''}`,
+      `act.sub ${claims.act?.sub} is not an allowed actor`,
+      header ? `the actor is taken from the unsigned X-Actor-Client=${header} header, not from the signed token` : `the actor is ${actor ?? 'none'}`);
+    if (policy.act_validation) {
+      if (!actOk) return { ...refusal('act_validation', { error_description: `${controlById('act_validation').message} act.sub=${claims.act.sub}` }), events };
+      if (header) events.push({ control: 'act_validation', action: 'ignored_header', message: `Ignored caller-supplied X-Actor-Client=${header}; the actor comes from the signed token only.` });
+    } else if (header) actor = header; // the flaw: a caller-supplied actor wins
+    const scopes = String(claims.scope || '').split(' ');
+    const scopeOk = scopes.includes(t.scope);
+    check('scope_check', scopeOk, `the token scope (${scopes.join(' ')}) includes ${t.scope}`, `the tool needs ${t.scope}, the token has ${scopes.join(' ')}`, `the tool needs ${t.scope}, the token has ${scopes.join(' ')}`);
+    if (policy.scope_check && !scopeOk) {
+      return { ...refusal('scope_check', { error_description: `${controlById('scope_check').message} needs=${t.scope} has=${scopes.join(' ')}` }), wwwAuthenticate: `Bearer error="insufficient_scope", scope="${t.scope}"`, events };
+    }
+    if (t.objectArg) {
+      const acc = accounts[args[t.objectArg]];
+      const ownerOk = Boolean(acc) && acc.owner === claims.sub;
+      check('ownership_check', ownerOk, `${args[t.objectArg]} belongs to the token subject ${claims.sub}`, `${args[t.objectArg]} does not belong to the token subject ${claims.sub}`, `the request names ${args[t.objectArg]}, the token subject is ${claims.sub}`);
+      if (policy.ownership_check && !ownerOk) return { ...refusal('ownership_check', { error_description: `${controlById('ownership_check').message} object=${args[t.objectArg]}` }), events };
+    }
+    const ctx = { sub: claims.sub, actor };
+    switch (tool) {
+      case 'list_accounts': return { ok: true, status: 200, body: { accounts: Object.values(accounts).filter((a) => a.owner === claims.sub) }, events };
+      case 'get_account': return accounts[args.accountId] ? { ok: true, status: 200, body: { account: accounts[args.accountId] }, events } : { ok: false, status: 404, error: 'not_found', events };
+      case 'transfer_funds': {
+        const { fromAccountId: from, toAccountId: to, amount } = args;
+        if (!accounts[from] || !accounts[to] || !(amount > 0)) return { ok: false, status: 400, error: 'invalid_request', events };
+        accounts[from].balance -= amount; accounts[to].balance += amount;
+        const entry = { action: 'transfer_funds', from, to, amount, onBehalfOf: ctx.sub, actor: ctx.actor };
+        audit.push(entry);
+        return { ok: true, status: 200, body: { transferred: amount, from, to, audit: entry }, events };
+      }
+      case 'sync_statement': {
+        let upstreamToken = bearer; let kind = 'raw';
+        if (policy.no_token_forwarding) {
+          upstreamToken = await good.exchange(bearer, URLS.billing, CLIENTS.gateway); kind = 'exchanged';
+          events.push({ control: 'no_token_forwarding', action: 'exchanged', error: controlById('no_token_forwarding').error, message: controlById('no_token_forwarding').message });
+        }
+        note('no_token_forwarding', policy.no_token_forwarding ? 'pass' : 'info', policy.no_token_forwarding ? 'the caller token was exchanged for a separate 60 second token with the backend as audience; the backend never saw the caller token' : 'OFF in this run, so not checked: the caller token was forwarded to the backend unchanged');
+        await upstream.handle(upstreamToken);
+        return { ok: true, status: 200, body: { statement: 'queued', upstreamToken: kind }, events };
+      }
+      default: return { ok: false, status: 404, error: 'unknown_tool', events };
+    }
+  }
   return {
-    async handle({ tool, args = {}, headers = {} }) {
-      const events = [];
-      const m = /^Bearer (.+)$/.exec(headers.authorization || '');
-      if (!m) return { ok: false, status: 401, error: 'invalid_request', error_description: 'No bearer token.', events };
-      const bearer = m[1];
-      let claims;
-      try { claims = await verifyAccessToken(bearer, keys.good); } // baseline, always on: signature, issuer, expiry
-      catch (e) { return { ok: false, status: 401, error: 'invalid_token', error_description: `Token rejected before any policy runs: ${e.code || e.message}.`, baseline: true, events }; }
-      const t = TOOLS[tool];
-      if (!t) return { ok: false, status: 404, error: 'unknown_tool', error_description: `No tool named ${tool}.`, events };
-      const auds = [].concat(claims.aud || []);
-      if (policy.audience_binding && !auds.includes(URLS.gateway)) return { ...refusal('audience_binding', { error_description: `${controlById('audience_binding').message} aud=${JSON.stringify(auds)}` }), events };
-      if (policy.client_allowlist && !ALLOWED_CLIENTS.includes(claims.azp)) return { ...refusal('client_allowlist', { error_description: `${controlById('client_allowlist').message} azp=${claims.azp}` }), events };
-      if (policy.require_delegation && t.agentMediated && claims.act == null) return { ...refusal('require_delegation'), events };
-      let actor = claims.act?.sub ?? null;
-      if (policy.act_validation) {
-        if (claims.act && !ALLOWED_ACTORS.includes(claims.act.sub)) return { ...refusal('act_validation', { error_description: `${controlById('act_validation').message} act.sub=${claims.act.sub}` }), events };
-        if (headers['x-actor-client']) events.push({ control: 'act_validation', action: 'ignored_header', message: `Ignored caller-supplied X-Actor-Client=${headers['x-actor-client']}; the actor comes from the signed token only.` });
-      } else if (headers['x-actor-client']) actor = headers['x-actor-client']; // the flaw: a caller-supplied actor wins
-      const scopes = String(claims.scope || '').split(' ');
-      if (policy.scope_check && !scopes.includes(t.scope)) {
-        return { ...refusal('scope_check', { error_description: `${controlById('scope_check').message} needs=${t.scope} has=${scopes.join(' ')}` }), wwwAuthenticate: `Bearer error="insufficient_scope", scope="${t.scope}"`, events };
-      }
-      if (t.objectArg) {
-        const acc = accounts[args[t.objectArg]];
-        if (policy.ownership_check && (!acc || acc.owner !== claims.sub)) return { ...refusal('ownership_check', { error_description: `${controlById('ownership_check').message} object=${args[t.objectArg]}` }), events };
-      }
-      const ctx = { sub: claims.sub, actor };
-      switch (tool) {
-        case 'list_accounts': return { ok: true, status: 200, body: { accounts: Object.values(accounts).filter((a) => a.owner === claims.sub) }, events };
-        case 'get_account': return accounts[args.accountId] ? { ok: true, status: 200, body: { account: accounts[args.accountId] }, events } : { ok: false, status: 404, error: 'not_found', events };
-        case 'transfer_funds': {
-          const { fromAccountId: from, toAccountId: to, amount } = args;
-          if (!accounts[from] || !accounts[to] || !(amount > 0)) return { ok: false, status: 400, error: 'invalid_request', events };
-          accounts[from].balance -= amount; accounts[to].balance += amount;
-          const entry = { action: 'transfer_funds', from, to, amount, onBehalfOf: ctx.sub, actor: ctx.actor };
-          audit.push(entry);
-          return { ok: true, status: 200, body: { transferred: amount, from, to, audit: entry }, events };
-        }
-        case 'sync_statement': {
-          let upstreamToken = bearer; let kind = 'raw';
-          if (policy.no_token_forwarding) {
-            upstreamToken = await good.exchange(bearer, URLS.billing, CLIENTS.gateway); kind = 'exchanged';
-            events.push({ control: 'no_token_forwarding', action: 'exchanged', error: controlById('no_token_forwarding').error, message: controlById('no_token_forwarding').message });
-          }
-          await upstream.handle(upstreamToken);
-          return { ok: true, status: 200, body: { statement: 'queued', upstreamToken: kind }, events };
-        }
-        default: return { ok: false, status: 404, error: 'unknown_tool', events };
-      }
+    async handle(req) {
+      const log = [];
+      const r = await run(req, (id, outcome, evidence) => log.push({ id, label: labelOf(id), outcome, evidence }));
+      return { ...r, decisions: completeDecisions(log, req.tool, r) };
     },
   };
 }

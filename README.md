@@ -42,6 +42,7 @@ Other variable: `HOST_PORT=5181` (Docker host port). Keep both inside 5180-5199.
 | Engine: 10 attacks, 10 controls, mock good AS, evil AS, gateway, resource server, DCR proxy, SSRF fake network | built, tested |
 | API: `/api/catalog`, `/api/run` (optional `controlsOff`), `/api/matrix`, `/api/controls`, `/api/asi`, `/api/reset`, `/api/health` (demo-health/1) | built, tested |
 | Web UI | Gallery, OWASP ASI tab, attack page (ungoverned / governed / both, control toggle), controls, compare matrix, honest limits, stories, ReactFlow diagram (movable boxes, Simulate, Reset, speed), presenter mode, light/dark |
+| What Privilege did (Rule 25) | Under each run's trail, every call to the mock gateway: the exact request, the exact response and the decisions it made, in order (shared `GatewayTrace`, Mock only; a control that is OFF shows as information, never as passed) | built, tested |
 | Docker (OrbStack) | `Dockerfile` + `docker-compose.yml`, loopback-only publish pinned by a test; verified live (see Docker) |
 | Shelf entry | `docs/shelf-entry.json`; verified against a running demo-shelf (state `ready`) |
 | Learning Hub content pack | `content-pack.json`, validated with ajv against `docs/content-pack.schema.json` (a copy of the kit's schema) |
