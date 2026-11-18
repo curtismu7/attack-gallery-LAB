@@ -24,7 +24,6 @@ const readTheme = () => { try { return localStorage.getItem(THEME_KEY); } catch 
 
 function useRoute() {
   const [r, setR] = useState(route);
-  const [talkOpen, setTalkOpen] = useState(false);
   useEffect(() => { const on = () => setR(route()); window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
   return r;
 }
@@ -38,7 +37,7 @@ const FONT_KEY = 'gallery.font';
 const readFont = () => { try { const f = localStorage.getItem(FONT_KEY); return ['S', 'M', 'L'].includes(f) ? f : 'M'; } catch { return 'M'; } };
 const saveFont = (f) => { try { localStorage.setItem(FONT_KEY, f); } catch { /* not remembered */ } };
 
-function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset }) {
+function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset, talkOpen, setTalkOpen }) {
   const { present, set: setPresent } = usePresent();
   return (
     <TopMenu
@@ -58,6 +57,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
 
 export default function App() {
   const { name, arg } = useRoute();
+  const [talkOpen, setTalkOpen] = useState(false);
   const [theme, setThemePersist] = useTheme();
   const [fontStep, setFontStep] = useState(readFont);
   const ctl = useLoad(getControls);
@@ -100,7 +100,7 @@ export default function App() {
             : <span className="shell-badge" data-testid="mode-badge">Mock</span>}
         </span>
         <nav className="shell-nav" aria-label="Main">{NAV.map(([id, label]) => <a key={id} href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a>)}</nav>
-        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} />
+        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} talkOpen={talkOpen} setTalkOpen={setTalkOpen} />
       </header>
       <main id="main" tabIndex={-1} className="page">
         {mockOnly
@@ -111,8 +111,8 @@ export default function App() {
         <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
+      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
     </PresentProvider>
   );
 }
-      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
 
