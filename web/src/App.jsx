@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { getControls, getHealth, getInfo, resetKeys, setMode } from './api.js';
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
+import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
+import { pageTalkSteps } from "./story/StoryPanel";
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
 import { PresentBar, PresentProvider, PresentToggle, usePresent } from './present/PresentMode.jsx';
@@ -22,6 +24,7 @@ const readTheme = () => { try { return localStorage.getItem(THEME_KEY); } catch 
 
 function useRoute() {
   const [r, setR] = useState(route);
+  const [talkOpen, setTalkOpen] = useState(false);
   useEffect(() => { const on = () => setR(route()); window.addEventListener('hashchange', on); return () => window.removeEventListener('hashchange', on); }, []);
   return r;
 }
@@ -43,6 +46,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
       theme={{ value: theme, onChange: setThemePersist }}
       fontSize={{ value: fontStep, onChange: setFontStep }}
       present={{ active: present, onToggle: () => setPresent(!present), label: 'Present' }}
+      talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
       help={{ href: 'https://github.com/curtismu7/attack-gallery-LAB#readme' }}
       onReset={onReset}
     >
@@ -110,3 +114,5 @@ export default function App() {
     </PresentProvider>
   );
 }
+      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
+
