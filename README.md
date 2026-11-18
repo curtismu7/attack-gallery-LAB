@@ -159,15 +159,15 @@ See [docs/controls.md](docs/controls.md) (what each control does not stop) and t
 ## Real mode: through the PingOne Privilege gateway
 
 Real mode here is one live call through the SE PingOne Privilege gateway
-(`https://mcpgw.ai-demo.ping-devops.com`) with an agent access key from the shared settings
-file (`~/Development/.env`, or the file `STANDALONE_ENV` names).
+(the gateway host is in the shared settings file) with an agent access key from the shared
+settings file (`~/Development/.env`, or the file `STANDALONE_ENV` names).
 
 **Privilege objects this lab uses:**
 
 | Object | Value |
 |---|---|
-| Gateway | `mcpgw.ai-demo.ping-devops.com` (cluster `ai-demo-cmuir`) |
-| Door (Agentic App) | `aggregate-limited` — client path `/aggregate-limited/mcp` |
+| Gateway | the SE Privilege gateway (host in the shared settings file) |
+| Agentic App | `aggregate-limited` — client path `/aggregate-limited/mcp` |
 | Caller | agent access key `AGA_GW_KEY_LAB_AGENT` (write-only, never shown) |
 | Backend | `aggregate` = the gateway's MCP aggregate over `opensearch` (9 tools) + `banking-mcp` (33 tools); `aggregate-limited` = the same members with a tool filter |
 
