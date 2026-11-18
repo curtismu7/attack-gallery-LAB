@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getControls, getHealth, getInfo, resetKeys, setMode } from './api.js';
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
-import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
-import { pageTalkSteps } from "./story/StoryPanel";
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
 import { PresentBar, PresentProvider, PresentToggle, usePresent } from './present/PresentMode.jsx';
@@ -15,7 +13,7 @@ import StoriesPage from './pages/StoriesPage.jsx';
 import DiagramPage from './pages/DiagramPage.jsx';
 import AsiPage from './pages/AsiPage.jsx';
 import ShelfLink from "./components/ShelfLink.jsx";
-import PrivilegeCheck from "./privilege-check/PrivilegeCheck.jsx";
+import VerifyMark from "./components/VerifyMark.jsx";
 
 const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
 const THEME_KEY = 'gallery.theme';
@@ -37,7 +35,7 @@ const FONT_KEY = 'gallery.font';
 const readFont = () => { try { const f = localStorage.getItem(FONT_KEY); return ['S', 'M', 'L'].includes(f) ? f : 'M'; } catch { return 'M'; } };
 const saveFont = (f) => { try { localStorage.setItem(FONT_KEY, f); } catch { /* not remembered */ } };
 
-function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset, talkOpen, setTalkOpen }) {
+function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset }) {
   const { present, set: setPresent } = usePresent();
   return (
     <TopMenu
@@ -45,18 +43,17 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
       theme={{ value: theme, onChange: setThemePersist }}
       fontSize={{ value: fontStep, onChange: setFontStep }}
       present={{ active: present, onToggle: () => setPresent(!present), label: 'Present' }}
-      talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
       help={{ href: 'https://github.com/curtismu7/attack-gallery-LAB#readme' }}
       onReset={onReset}
     >
       <ShelfLink />
+      <VerifyMark id="attack-gallery" />
     </TopMenu>
   );
 }
 
 export default function App() {
   const { name, arg } = useRoute();
-  const [talkOpen, setTalkOpen] = useState(false);
   const [theme, setThemePersist] = useTheme();
   const [fontStep, setFontStep] = useState(readFont);
   const ctl = useLoad(getControls);
@@ -90,26 +87,26 @@ export default function App() {
   return (
     <PresentProvider>
       <a className="skip" href="#main" onClick={(e) => { e.preventDefault(); document.getElementById('main')?.focus(); }}>Skip to content</a>
-      <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
-      <header className="top">
-        <strong className="brand">Agent Attack Gallery</strong>
-        <nav aria-label="Main"><ul>{NAV.map(([id, label]) => <li key={id}><a href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a></li>)}</ul></nav>
-        <div className="top__tools">
-            <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} talkOpen={talkOpen} setTalkOpen={setTalkOpen} />
-          </div>
+      <header className="shell-bar">
+        <span className="shell-brand">
+          <span className="shell-logo" aria-hidden="true">AG</span>
+          <strong>Agent Attack Gallery</strong>
+          {modeInfo?.source === 'real'
+            ? <span className="shell-badge shell-badge--real" data-testid="mode-badge">Real</span>
+            : <span className="shell-badge" data-testid="mode-badge">Mock</span>}
+        </span>
+        <nav className="shell-nav" aria-label="Main">{NAV.map(([id, label]) => <a key={id} href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a>)}</nav>
+        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} />
       </header>
-      {mockOnly
-        ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
-        : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
-      {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
-      {hasClaim(name) && <ClaimBanner />}
       <main id="main" tabIndex={-1} className="page">
-
-        <PrivilegeCheck />
+        {mockOnly
+          ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
+          : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
+        {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
+        {hasClaim(name) && <ClaimBanner />}
+        <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
-      <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
     </PresentProvider>
   );
 }
-
