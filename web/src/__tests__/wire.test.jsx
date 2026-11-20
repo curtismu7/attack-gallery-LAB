@@ -74,7 +74,7 @@ describe('On the wire panel', () => {
     expect(box.querySelector('.jtok--hot').textContent).toContain('accountId');
     setJsonView('form');
     fireEvent.click(box.querySelector('.jsonbox__toggle button')); // Form
-    const row = [...req.querySelectorAll('.jform__row')].find((r) => r.querySelector('.jform__k').textContent === 'accountId');
+    const row = [...req.querySelectorAll('.jform__row')].find((r) => r.querySelector('.jform__k').textContent === 'params.arguments.accountId'); // the hybrid pane lists a nested field as one dot-path row
     expect(row).toHaveAttribute('data-hot', 'true');
     expect(row.querySelector('.jform__d').textContent).toBe('acc-2001');
   });
