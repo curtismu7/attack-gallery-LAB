@@ -229,7 +229,7 @@ describe('inert text: hostile strings never execute or become markup', () => {
     expect(claims).toHaveAttribute('data-view', 'form');
     expect([...claims.querySelectorAll('.jform__k')].map((n) => n.textContent)).toEqual(['sub', 'aud', 'scope', 'exp']); // jti stays out, as before
     expect([...redacted.querySelectorAll('.jform__k')].map((n) => n.textContent)).not.toContain('token');
-    expect(redacted.querySelector('.jform__row[data-hot="true"] > .jform__k').textContent).toBe('tool');
+    expect(redacted.querySelector('.jform__row[data-hot="true"] > .jform__k').textContent).toBe('request.tool'); // the hybrid pane lists a nested field as a dot-path row
     fireEvent.click(within(redacted).getByRole('button', { name: 'JSON' }));
     expect(redacted.querySelector('pre.json--raw').textContent).not.toContain('"token"');
   });

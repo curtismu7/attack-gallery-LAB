@@ -106,7 +106,6 @@ details summary { cursor: pointer; font-size: .85rem; color: var(--muted); min-h
 .wire__row--hot td { background: var(--surface-2); }
 .wire__notice { margin: .8rem 0 0; padding: .6rem .8rem; border-left: 4px solid var(--accent); background: var(--accent-soft); border-radius: 0 6px 6px 0; }
 .wire__table td:first-child { white-space: nowrap; }
-.wire__table .jform__row { grid-template-columns: minmax(0, 1fr); } /* a claim that is an object (act) sits in a narrow table cell: key over value, so the Form view fits */
 
 /* Release-claim banner, source tags and ASI mapping (slide 55). Tokens only. */
 .banner--claim { background: var(--accent-soft); }
