@@ -6,7 +6,7 @@ export default function GalleryPage({ controlsById }) {
   return (
     <>
       <h1>Attack gallery</h1>
-      <p className="lede">Named attacks against a mock MCP-style stack. Each runs twice: against a stack that has the flaw, and against one with the named control on.</p>
+      <p className="lede">Named attacks against a mock MCP-style stack at AirGuard Airlines, a fictional airline, where agents act on SkyMiles loyalty accounts. Each runs twice: against a stack that has the flaw, and against one with the named control on.</p>
       <Loading state={state}>
         {({ packs, attacks }) => packs.map((p) => (
           <section key={p.id} aria-labelledby={`pack-${p.id}`}>

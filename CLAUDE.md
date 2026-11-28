@@ -14,6 +14,8 @@ Agent Attack Gallery: a self-contained demo where an SE launches 10 named attack
 
 ## Rules that bite
 
+- **Default story: AirGuard Airlines, a fictional airline** (fleet spec 2026-11-28). `DEFAULT_VERTICAL = 'airlines'` in `web/src/story/stories.js` (the `generic` and `banking` packs stay selectable; an unknown or missing id falls back to the default). The mock world is AirGuard Airlines's SkyMiles accounts (`server/src/world.js`: Emma and Noah, balances in miles, tool `transfer_miles`); attack ids, control ids, refusal errors and the `accounts:*` scope names are unchanged. The pack's cast slot ids stay `mark`/`mary` (stories use `{{mark}}`); only the names changed. `server/test/airlineDefault.test.js` fails if bank wording, an old brand or the old cast names come back into what a run shows. Real mode is untouched.
+
 - Loopback-only bind; a non-loopback `GALLERY_HOST` is refused without `GALLERY_BIND`. Docker publishes `127.0.0.1:` only (pinned by a test).
 - Netguard: no real outbound call, ever. Every party is an in-process mock; the SSRF attack runs on a fake network. A test asserts zero attempts, with a self-test that proves it trips.
 - User-supplied text is rendered inert. Hostnames are `.example` or `.invalid` only.

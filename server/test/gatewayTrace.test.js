@@ -83,11 +83,11 @@ test('no bearer, a forged token and an unknown tool each stop at the right check
   const w = await createWorld(keys, governed());
   const none = await w.gateway.handle({ tool: 'list_accounts', headers: {} });
   assert.equal(none.decisions[0].outcome, 'fail'); assert.ok(none.decisions.slice(1).every((d) => d.outcome === 'skipped'));
-  const forged = await w.evil.forgeTokenClaimingGoodIssuer({ sub: 'user-mark', aud: URLS.gateway, scope: 'accounts:read', azp: 'client-legit' });
+  const forged = await w.evil.forgeTokenClaimingGoodIssuer({ sub: 'user-emma', aud: URLS.gateway, scope: 'accounts:read', azp: 'client-legit' });
   const bad = await w.gateway.handle({ tool: 'list_accounts', headers: { authorization: `Bearer ${forged}` } });
   assert.equal(bad.decisions.find((d) => d.id === 'authenticated').outcome, 'fail');
   assert.ok(bad.decisions.filter((d) => d.id !== 'authenticated').every((d) => d.outcome === 'skipped'));
-  const good = await w.good.issue({ sub: 'user-mark', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
+  const good = await w.good.issue({ sub: 'user-emma', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
   const unknown = await w.gateway.handle({ tool: 'no_such_tool', headers: { authorization: `Bearer ${good}` } });
   assert.deepEqual(unknown.decisions.map((d) => [d.id, d.outcome]).slice(0, 2), [['authenticated', 'pass'], ['tool', 'fail']]);
   for (const r of [none, bad, unknown]) assert.deepEqual(assertTrace(gatewayExchange({ tool: 'list_accounts', bearer: 'x'.repeat(10), r })), []);
@@ -95,7 +95,7 @@ test('no bearer, a forged token and an unknown tool each stop at the right check
 
 test('a call that passes (or skips) every check but the tool answers an error shows a failed tool result', async () => {
   const w = await createWorld(keys, ungoverned());
-  const token = await w.good.issue({ sub: 'user-mark', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
+  const token = await w.good.issue({ sub: 'user-emma', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
   const r = await w.gateway.handle({ tool: 'get_account', args: { accountId: 'acc-nope' }, headers: { authorization: `Bearer ${token}` } });
   assert.equal(r.status, 404);
   assert.deepEqual(r.decisions.filter((d) => d.outcome === 'fail').map((d) => d.id), ['result']);
@@ -104,7 +104,7 @@ test('a call that passes (or skips) every check but the tool answers an error sh
 
 test('no secret in a trace: a token minted at runtime appears nowhere, only its length', async () => {
   const w = await createWorld(keys, governed());
-  const token = await w.good.issue({ sub: 'user-mark', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
+  const token = await w.good.issue({ sub: 'user-emma', client: 'client-legit', aud: URLS.gateway, scope: 'accounts:read' });
   const r = await w.gateway.handle({ tool: 'list_accounts', headers: { authorization: `Bearer ${token}` } });
   const trace = gatewayExchange({ tool: 'list_accounts', bearer: token, r });
   assert.deepEqual(assertTrace(trace), []);

@@ -40,14 +40,14 @@ export const JARGON = {
 
 // The deciding field for each attack: claims that are read, claims whose ABSENCE decides, and text to highlight in the messages.
 const KEY = {
-  'wrong-scope': { claims: ['scope'], marks: ['accounts:write', 'insufficient_scope'], why: 'The deciding field is scope: the token carries accounts:read but transfer_funds needs accounts:write.' },
+  'wrong-scope': { claims: ['scope'], marks: ['accounts:write', 'insufficient_scope'], why: 'The deciding field is scope: the token carries accounts:read but transfer_miles needs accounts:write.' },
   'other-account': { claims: ['sub'], marks: ['"accountId": "acc-2001"', 'forbidden_object'], why: 'The deciding comparison is sub (whose token this is) against the owner of the account named in the request body.' },
   'bad-client': { claims: ['azp'], marks: ['unauthorized_client'], why: 'The deciding field is azp: the token was issued to client-attacker, which the gateway operator never registered.' },
   'rogue-actor': { claims: ['act'], marks: ['X-Actor-Client: agent-ok', 'unauthorized_actor'], why: 'The signed act claim names agent-rogue. The X-Actor-Client header is unsigned text the caller typed, so only the signed claim may be believed.' },
-  impersonation: { missing: ['act'], marks: ['delegation_required'], why: 'The deciding fact is what is missing: there is no act claim, so nothing records that an agent acted for Mark.' },
-  'raw-forwarding': { claims: ['jti', 'aud'], marks: ['token_forwarding_blocked'], why: 'The jti (token id) in the backend\'s log equals the jti of Mark\'s token: it is a copy of the same credential. With the control on, the backend only ever sees a different token with its own aud and a 60 second life.' },
+  impersonation: { missing: ['act'], marks: ['delegation_required'], why: 'The deciding fact is what is missing: there is no act claim, so nothing records that an agent acted for Emma.' },
+  'raw-forwarding': { claims: ['jti', 'aud'], marks: ['token_forwarding_blocked'], why: 'The jti (token id) in the backend\'s log equals the jti of Emma\'s token: it is a copy of the same credential. With the control on, the backend only ever sees a different token with its own aud and a 60 second life.' },
   'issuer-mixup': { claims: ['iss'], marks: ['iss='], why: 'The deciding field is the iss in the authorization response. It names the good server while the client believes it talked to the evil one.' },
-  'audience-confusion': { claims: ['aud'], marks: ['invalid_token'], why: 'The deciding field is aud: the token was issued for the billing API, not for this gateway. Signature and issuer are fine, so only an audience check catches it.' },
+  'audience-confusion': { claims: ['aud'], marks: ['invalid_token'], why: 'The deciding field is aud: the token was issued for the SkyMiles billing API, not for this gateway. Signature and issuer are fine, so only an audience check catches it.' },
   'confused-deputy-dcr': { marks: ['redirect_uri=https://attacker.example/cb', 'Cookie:', 'consent_required'], why: 'The deciding field is the Cookie header: the third-party server remembers "approved" for the shared client id, so it skips the question for the attacker\'s redirect address.' },
   'ssrf-metadata': { marks: ['resource_metadata', 'ssrf_blocked'], why: 'The deciding field is the address in resource_metadata: a hostile server chose a link-local address, and a client that fetches it blindly reads internal data.' },
 };
@@ -116,7 +116,7 @@ const BUILD = {
       tokenLabel: 'The token the evil server walked away with',
     };
   },
-  'proxy-login': (e) => ({ none: `No network call here: this is a decision a person makes. Mark approves the consent screens in his browser (${(e.response.approvals || []).join('; ')}).` }),
+  'proxy-login': (e) => ({ none: `No network call here: this is a decision a person makes. Emma approves the consent screens in her browser (${(e.response.approvals || []).join('; ')}).` }),
   'dcr-register'(e) {
     return {
       req: { start: `POST ${url(HOST.proxy)}/register HTTP/1.1`, headers: [['Host', HOST.proxy], ['Content-Type', 'application/json']], body: json({ client_name: e.request.client_name, redirect_uris: e.request.redirect_uris }) },

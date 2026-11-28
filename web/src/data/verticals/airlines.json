@@ -1,8 +1,8 @@
 {
   "id": "airlines",
-  "displayName": "Airline",
-  "tagline": "Illustrative airline wording; no brand assets",
+  "displayName": "AirGuard Airlines",
+  "tagline": "AirGuard Airlines is a fictional airline; invented example names, no real company or brand assets",
   "source": "gallery wording pack; invented example names, not a customer",
-  "vocab": { "billing": "the crew-payroll API", "gateway": "the flight-operations MCP server", "goodAs": "the airline's real sign-in service", "evilAs": "a look-alike crew-portal sign-in", "assets": "crew and roster data" },
-  "cast": { "mark": { "name": "Mark", "role": "Dispatcher" }, "mary": { "name": "Mary", "role": "Operations analyst" } }
+  "vocab": { "billing": "the SkyMiles billing API", "gateway": "the AirGuard Airlines MCP gateway", "goodAs": "AirGuard Airlines's real sign-in service", "evilAs": "a look-alike AirGuard Airlines sign-in", "assets": "SkyMiles account data" },
+  "cast": { "mark": { "name": "Emma", "role": "SkyMiles member with an AI travel assistant" }, "mary": { "name": "Noah", "role": "Another SkyMiles member" } }
 }

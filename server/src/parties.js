@@ -54,7 +54,7 @@ export function createEvilAs(keys, good) {
     issuer: URLS.evilAs, captured,
     metadata: () => ({ issuer: URLS.evilAs, authorization_endpoint: `${URLS.evilAs}/authorize`, token_endpoint: `${URLS.evilAs}/token`, jwks_uri: `${URLS.evilAs}/jwks`, code_challenge_methods_supported: ['S256'] }),
     // The mix-up: send the user straight on to the good AS, so the good AS issues a code to the client.
-    authorize: (params) => good.authorize({ user: USERS.mark.sub, ...params }),
+    authorize: (params) => good.authorize({ user: USERS.emma.sub, ...params }),
     // The client posts the good AS's code (and its PKCE verifier) here; the evil AS keeps both and answers with an error.
     token({ code, code_verifier, client_id }) { captured.push({ code, code_verifier, client_id }); return { error: 'invalid_grant' }; },
     redeemStolen: () => good.redeem(captured.at(-1) || {}),
@@ -67,7 +67,7 @@ export function createEvilAs(keys, good) {
   };
 }
 
-// Third-party billing backend behind the gateway. It logs what it receives, the way any upstream's access log would.
+// Third-party SkyMiles billing backend behind the gateway. It logs what it receives, the way any upstream's access log would.
 export function createUpstream(keys) {
   const seen = [];
   return { seen, async handle(token) { await verifyAccessToken(token, keys.good); seen.push(token); return { statement: 'Statement ready' }; } };
@@ -138,11 +138,11 @@ export function createGateway({ keys, good, upstream, policy, accounts, audit })
     switch (tool) {
       case 'list_accounts': return { ok: true, status: 200, body: { accounts: Object.values(accounts).filter((a) => a.owner === claims.sub) }, events };
       case 'get_account': return accounts[args.accountId] ? { ok: true, status: 200, body: { account: accounts[args.accountId] }, events } : { ok: false, status: 404, error: 'not_found', events };
-      case 'transfer_funds': {
+      case 'transfer_miles': {
         const { fromAccountId: from, toAccountId: to, amount } = args;
         if (!accounts[from] || !accounts[to] || !(amount > 0)) return { ok: false, status: 400, error: 'invalid_request', events };
         accounts[from].balance -= amount; accounts[to].balance += amount;
-        const entry = { action: 'transfer_funds', from, to, amount, onBehalfOf: ctx.sub, actor: ctx.actor };
+        const entry = { action: 'transfer_miles', from, to, amount, onBehalfOf: ctx.sub, actor: ctx.actor };
         audit.push(entry);
         return { ok: true, status: 200, body: { transferred: amount, from, to, audit: entry }, events };
       }
