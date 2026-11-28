@@ -23,7 +23,7 @@ import VerifyMark from "./components/VerifyMark.jsx";
 const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
 // The Real-or-mock modal's lines (it replaced the always-on simulation banner). This gallery has no live version, so the mode is always mock; the hosted build has its own line.
 const MODE_LINES = {
-  local: 'Every party here is a mock running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.',
+  local: 'All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.',
   hosted: 'Hosted and simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.',
 };
 const THEME_KEY = 'gallery.theme';
