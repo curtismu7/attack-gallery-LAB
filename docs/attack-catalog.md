@@ -100,7 +100,7 @@ Pack 1. Named control: `require_delegation`.
 
 **Goal.** Call an agent-only tool with a bare user token so the agent leaves no trace.
 
-**Story.** Emma's user token has no act claim. The call looks like Emma himself.
+**Story.** Emma's user token has no act claim. The call looks like Emma herself.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 

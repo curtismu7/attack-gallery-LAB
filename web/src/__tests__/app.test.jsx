@@ -142,6 +142,7 @@ describe('controls, compare, limits', () => {
 });
 
 describe('stories page', () => {
+  beforeEach(() => { localStorage.removeItem('gallery.story.vertical'); });
   it('opens on Meridian Air by default, in the story, the gallery lede and the attack page, and no leftover wording from the other packs', async () => {
     go('#/stories'); await screen.findByTestId('story-panel');
     expect(screen.getByLabelText('Vertical')).toHaveValue('airlines');

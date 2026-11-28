@@ -13,7 +13,7 @@ let keys; before(async () => { keys = await createKeyring(); });
 const read = (f) => readFileSync(new URL(`../../${f}`, import.meta.url), 'utf8');
 
 // Wording from the retired bank world, and the brands the fleet is retiring. `funds` and `payee` are bank words; `Mark`/`Mary` are the old cast.
-const OLD = /\b(bank|banking|checking|savings|payee|funds|money|Mark|Mary|Fabrikam|Northwind|Contoso|Harbor|Vellum|Skyline|Tessera)\b|transfer_funds|crew-payroll/i;
+const OLD = /\b(bank|banking|checking|savings|payee|funds|money|Mark|Mary|Fabrikam|Northwind|Contoso|Harbor|Vellum|Skyline|Tessera)\b|transfer_funds|crew-payroll|Emma himself|Noah herself/i;
 
 test('the mock world is Meridian Air: SkyMiles accounts in miles, Emma and Noah, a miles-transfer tool', () => {
   assert.deepEqual(Object.values(USERS).map((u) => u.name), ['Emma', 'Noah']);

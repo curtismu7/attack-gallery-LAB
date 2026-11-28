@@ -40,7 +40,7 @@ export const ATTACKS = [
     expected: { ungoverned: 'The miles transfer runs and the audit record names agent-ok, the trusted agent.', governed: '403 unauthorized_actor on the signed act claim; the header is ignored.' } },
   { id: 'impersonation', name: 'Impersonation', pack: 1, control: 'require_delegation',
     goal: 'Call an agent-only tool with a bare user token so the agent leaves no trace.',
-    story: 'Emma\'s user token has no act claim. The call looks like Emma himself.',
+    story: 'Emma\'s user token has no act claim. The call looks like Emma herself.',
     steps: [
       { id: 'mint', kind: 'mint', var: 'main', label: 'A user token for Emma, no act claim', claims: { user: 'emma', client: 'legit', aud: 'gateway', scope: 'accounts:write' } },
       { id: 'call', kind: 'call', token: 'main', tool: 'transfer_miles', args: { fromAccountId: 'acc-1001', toAccountId: 'acc-9000', amount: 2500 }, label: 'transfer_miles without any agent identity' },
