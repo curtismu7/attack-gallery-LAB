@@ -37,13 +37,19 @@ try {
   page.on('request', (r) => { const u = new URL(r.url()); if (u.origin !== new URL(base).origin && !/^(data|blob):/.test(r.url())) external.push(r.url()); });
   page.on('pageerror', (e) => errors.push(String(e))); page.on('console', (m) => { if (m.type() === 'error') errors.push(m.text()); });
 
+  // Real-or-mock modal: a fresh session opens on MOCK; "Got it" closes it, and a reload in the same session does not bring it back (it is closed before anything is clicked)
+  await page.goto(`${base}/#/gallery`); await page.getByTestId('mode-modal').waitFor();
+  check((await page.getByTestId('mode-modal').getAttribute('data-mode')) === 'mock' && (await page.getByTestId('mode-modal').innerText()).includes('Nothing leaves this'), 'the page opens on the MOCK modal');
+  await shot('00-mode-modal'); await page.getByTestId('mode-modal-ok').click();
+  check((await page.getByTestId('mode-modal').count()) === 0, 'Got it closes the modal');
+  await page.reload(); await page.getByTestId('card-wrong-scope').waitFor();
+  check((await page.getByTestId('mode-modal').count()) === 0 && (await page.getByTestId('banner').count()) === 0 && (await page.getByTestId('mock-only-banner').count()) === 0, 'no modal after a same-session reload, and no simulation banner');
   // keyboard: skip link
   await go('gallery'); await page.getByTestId('card-wrong-scope').waitFor();
   await page.keyboard.press('Tab');
   check((await page.evaluate(() => document.activeElement.textContent)) === 'Skip to content', 'first Tab stop is the skip link');
   await page.keyboard.press('Enter');
   check(await page.evaluate(() => document.activeElement.id) === 'main', 'skip link moves focus to main');
-  check((await page.getByTestId('banner').innerText()).includes('Nothing leaves this machine'), 'banner says all parties are mocks');
   check((await page.locator('[data-testid^="card-"]').count()) === 10, 'gallery shows ten attack cards');
   check((await page.locator('.badge', { hasText: /^UNVERIFIED$/ }).count()) > 0 && (await page.locator('.badge', { hasText: /^VERIFIED$/ }).count()) > 0, 'cards carry VERIFIED and UNVERIFIED badges');
   await shot('01-gallery-light');
@@ -150,7 +156,7 @@ try {
   await page.getByTestId('theme-select').selectOption('dark');
   const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor); check(bg === 'rgb(5, 23, 39)', `dark theme applied (body ${bg})`); await shot('attack-dark');
   for (const hash of ['gallery', 'diagram', 'compare']) { await go(hash); await sleep(500); await shot(`dark-${hash}`); }
-  const dark = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' }); const dp = await dark.newPage();
+  const dark = await browser.newContext({ viewport: { width: 1280, height: 900 }, colorScheme: 'dark' }); const dp = await dark.newPage(); await dp.addInitScript(() => { try { sessionStorage.setItem('attack-gallery-mode-seen-mock', '1'); } catch { /* none */ } });
   await dp.goto(`${base}/#/gallery`); await dp.getByTestId('card-wrong-scope').waitFor();
   check((await dp.evaluate(() => getComputedStyle(document.body).backgroundColor)) === 'rgb(5, 23, 39)', 'dark system preference is followed'); await dark.close();
   await page.getByTestId('theme-select').selectOption('light');

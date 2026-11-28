@@ -15,32 +15,45 @@ const go = (hash) => { window.location.hash = hash; return render(<App />); };
 beforeEach(() => { window.location.hash = ''; setJsonView('form'); });
 
 describe('shell', () => {
-  it('has a skip link first, a nav, the all-mocks banner, and the gallery by default', async () => {
+  it('has a skip link first, a nav, the Mock modal, and the gallery by default', async () => {
     const { container } = render(<App />);
     expect(container.querySelector('a.skip')).toHaveTextContent('Skip to content');
     expect(container.firstElementChild).toBe(container.querySelector('a.skip'));
     expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
-    expect(screen.getByTestId('banner')).toHaveTextContent(/mocks/i); expect(screen.getByTestId('banner')).toHaveTextContent(/nothing leaves this machine/i);
-    // Page order (STANDALONE-UI-PATTERNS sections 1-2): skip link, the shell bar, then main with the simulation banner first.
+    // The Real-or-mock modal replaced the always-on simulation banner: it says MOCK, keeps the "nothing leaves this machine" sentence, and the banner is gone.
+    expect(screen.getByTestId('mode-modal')).toHaveAttribute('data-mode', 'mock');
+    expect(screen.getByTestId('mode-modal')).toHaveTextContent(/MOCK/); expect(screen.getByTestId('mode-modal')).toHaveTextContent(/mocks/i); expect(screen.getByTestId('mode-modal')).toHaveTextContent(/nothing leaves this machine/i);
+    expect(screen.queryByTestId('banner')).toBeNull(); expect(screen.queryByTestId('mock-only-banner')).toBeNull();
+    // Page order (STANDALONE-UI-PATTERNS sections 1-2): skip link, the shell bar, then main.
     const bar = container.querySelector('header.shell-bar');
     expect(container.querySelector('a.skip').nextElementSibling).toBe(bar);
     expect(bar.nextElementSibling).toBe(container.querySelector('main#main'));
-    expect(container.querySelector('main#main').firstElementChild).toBe(screen.getByTestId('banner'));
     expect(within(bar).getByRole('navigation', { name: 'Main' })).toBeInTheDocument();
     expect(within(bar).getByRole('link', { name: 'Gallery' })).toHaveAttribute('aria-current', 'page');
     expect(within(bar).getByTestId('top-menu')).toBeInTheDocument();
     expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
   });
-  it('shows the hosted-mock banner only when health reports mock-only', async () => {
+  it('Got it closes the modal, a reload in the same session does not bring it back, and the page is still there', async () => {
+    const first = render(<App />);
+    fireEvent.click(screen.getByTestId('mode-modal-ok'));
+    expect(screen.queryByTestId('mode-modal')).toBeNull();
+    expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
+    first.unmount(); render(<App />);
+    await screen.findByRole('heading', { name: 'Attack gallery' });
+    expect(screen.queryByTestId('mode-modal')).toBeNull();
+  });
+  it('the hosted build gets the hosted line in the same MOCK modal (health reports mock-only)', async () => {
     const real = globalThis.fetch;
     globalThis.fetch = (url, init) => (url === '/api/health' ? Promise.resolve(new Response(JSON.stringify({ mode: 'mock-only' }))) : real(url, init));
     try {
       render(<App />);
-      expect(await screen.findByTestId('mock-only-banner')).toHaveTextContent('Hosted, simulated');
-      expect(screen.queryByTestId('banner')).toBeNull(); // the always-on 'this machine' banner is swapped out, not stacked
+      await waitFor(() => expect(screen.getByTestId('mode-modal')).toHaveTextContent('Hosted and simulated'));
+      expect(screen.getByTestId('mode-modal')).toHaveAttribute('data-mode', 'mock');
+      expect(screen.getByTestId('mode-modal')).toHaveTextContent(/nothing leaves this server/i);
+      expect(screen.queryByTestId('banner')).toBeNull(); expect(screen.queryByTestId('mock-only-banner')).toBeNull();
     } finally { globalThis.fetch = real; }
   });
-  it('shows no hosted-mock banner when mode is absent', async () => {
+  it('shows the local line, not the hosted one, when health does not report mock-only', async () => {
     const real = globalThis.fetch; let settled;
     const healthSettled = new Promise((r) => { settled = r; });
     globalThis.fetch = (url, init) => {
@@ -51,8 +64,9 @@ describe('shell', () => {
     try {
       render(<App />);
       expect(await screen.findByRole('heading', { name: 'Attack gallery' })).toBeInTheDocument();
-      await healthSettled; // the banner decision is made only after /api/health resolves
-      expect(screen.queryByTestId('mock-only-banner')).toBeNull();
+      await healthSettled; // the line is chosen only after /api/health resolves
+      expect(screen.getByTestId('mode-modal')).toHaveTextContent(/nothing leaves this machine/i);
+      expect(screen.getByTestId('mode-modal')).not.toHaveTextContent('Hosted and simulated');
     } finally { globalThis.fetch = real; }
   });
   it('the skip link moves focus to the main region', async () => {

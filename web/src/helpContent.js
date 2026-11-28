@@ -25,7 +25,7 @@ export const HELP_SECTIONS = [
   },
   {
     heading: "Mock and Real",
-    body: "The mode toggle answers the server before anything changes. There is no live version of this gallery: every party is a mock inside the app and nothing leaves the machine, in either position of the toggle. The banner on the page says which you are in."
+    body: "The mode toggle answers the server before anything changes. There is no live version of this gallery: every party is a mock inside the app and nothing leaves the machine, in either position of the toggle. The notice that opens the page says which you are in."
   },
   {
     heading: "Where to read more",
