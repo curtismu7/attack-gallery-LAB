@@ -1,8 +1,8 @@
 {
   "id": "airlines",
-  "displayName": "Meridian Air",
-  "tagline": "Meridian Air is a fictional airline; invented example names, no real company or brand assets",
+  "displayName": "AirGuard Airlines",
+  "tagline": "AirGuard Airlines is a fictional airline; invented example names, no real company or brand assets",
   "source": "gallery wording pack; invented example names, not a customer",
-  "vocab": { "billing": "the SkyMiles billing API", "gateway": "the Meridian Air MCP gateway", "goodAs": "Meridian Air's real sign-in service", "evilAs": "a look-alike Meridian Air sign-in", "assets": "SkyMiles account data" },
+  "vocab": { "billing": "the SkyMiles billing API", "gateway": "the AirGuard Airlines MCP gateway", "goodAs": "AirGuard Airlines's real sign-in service", "evilAs": "a look-alike AirGuard Airlines sign-in", "assets": "SkyMiles account data" },
   "cast": { "mark": { "name": "Emma", "role": "SkyMiles member with an AI travel assistant" }, "mary": { "name": "Noah", "role": "Another SkyMiles member" } }
 }

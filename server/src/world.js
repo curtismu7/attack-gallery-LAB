@@ -1,4 +1,4 @@
-// Fixed cast of the mock world: Meridian Air, a fictional airline; the accounts are SkyMiles loyalty accounts (balances in miles). Every hostname is .example or .invalid (RFC 2606 names that never resolve).
+// Fixed cast of the mock world: AirGuard Airlines, a fictional airline; the accounts are SkyMiles loyalty accounts (balances in miles). Every hostname is .example or .invalid (RFC 2606 names that never resolve).
 export const URLS = {
   gateway: 'https://gw.gallery.example/mcp',
   goodAs: 'https://as.gallery.example',

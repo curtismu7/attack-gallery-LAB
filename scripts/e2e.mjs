@@ -88,7 +88,7 @@ try {
 
   // stories
   await go('stories'); await page.getByTestId('story-panel').waitFor();
-  check((await page.getByTestId('story-panel').innerText()).includes('Meridian Air'), 'story G1 opens on the default pack, Meridian Air');
+  check((await page.getByTestId('story-panel').innerText()).includes('AirGuard Airlines'), 'story G1 opens on the default pack, AirGuard Airlines');
   await page.getByRole('button', { name: 'Control blocks' }).click(); await page.getByLabel('Vertical').selectOption('airlines');
   check((await page.getByTestId('story-panel').innerText()).includes('SkyMiles billing API'), 'story G1 re-skins to the airlines pack');
   await shot('story-g1-airlines');

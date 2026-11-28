@@ -1,4 +1,4 @@
-// The default world is Meridian Air, a fictional airline (spec: AI-DEMO-Standalone docs/specs/2026-11-28-airline-default-fleet.md).
+// The default world is AirGuard Airlines, a fictional airline (spec: AI-DEMO-Standalone docs/specs/2026-11-28-airline-default-fleet.md).
 // What an attack run SHOWS (names, labels, balances, gains) must read as an airline; attack ids, controls and refusal errors do not change.
 import test, { before } from 'node:test';
 import assert from 'node:assert/strict';
@@ -13,9 +13,9 @@ let keys; before(async () => { keys = await createKeyring(); });
 const read = (f) => readFileSync(new URL(`../../${f}`, import.meta.url), 'utf8');
 
 // Wording from the retired bank world, and the brands the fleet is retiring. `funds` and `payee` are bank words; `Mark`/`Mary` are the old cast.
-const OLD = /\b(bank|banking|checking|savings|payee|funds|money|Mark|Mary|Fabrikam|Northwind|Contoso|Harbor|Vellum|Skyline|Tessera)\b|transfer_funds|crew-payroll|Emma himself|Noah herself/i;
+const OLD = /\b(bank|banking|checking|savings|payee|funds|money|Mark|Mary|Fabrikam|Northwind|Contoso|Harbor|Vellum|Skyline|Tessera)\b|transfer_funds|crew-payroll|Emma himself|Noah herself|Meridian Air/i;
 
-test('the mock world is Meridian Air: SkyMiles accounts in miles, Emma and Noah, a miles-transfer tool', () => {
+test('the mock world is AirGuard Airlines: SkyMiles accounts in miles, Emma and Noah, a miles-transfer tool', () => {
   assert.deepEqual(Object.values(USERS).map((u) => u.name), ['Emma', 'Noah']);
   const accounts = Object.values(freshAccounts());
   assert.deepEqual(accounts.map((a) => a.id), ['acc-1001', 'acc-1002', 'acc-2001', 'acc-9000'], 'the object ids the attacks name are unchanged');
@@ -43,7 +43,7 @@ test('the gains read in miles', async () => {
   assert.match(await gain('wrong-scope'), /2500 miles/); assert.match(await gain('other-account'), /18450 miles/); assert.match(await gain('rogue-actor'), /4000 miles/);
 });
 
-test('the pages and diagram text the run is read beside are Meridian Air too', () => {
+test('the pages and diagram text the run is read beside are AirGuard Airlines too', () => {
   for (const f of ['web/src/data/diagram.js', 'web/src/wire/wire.js', 'web/src/pages/GalleryPage.jsx']) assert.doesNotMatch(read(f), OLD, f);
-  assert.match(read('web/src/pages/GalleryPage.jsx'), /Meridian Air, a fictional airline/);
+  assert.match(read('web/src/pages/GalleryPage.jsx'), /AirGuard Airlines, a fictional airline/);
 });

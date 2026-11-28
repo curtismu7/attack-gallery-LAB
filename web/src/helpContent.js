@@ -4,7 +4,7 @@ export const HELP_SECTIONS = [
     heading: "What this lab is",
     body: [
       "A gallery where an SE launches NAMED attacks against a mock MCP-style stack and sees each one refused, with the reason and the named control. Every attack runs twice: UNGOVERNED (the mock stack has the flaw, so the attack succeeds and you see what the attacker gets) and GOVERNED (the named control refuses with an educational error).",
-      "The mock world is Meridian Air, a fictional airline: the agents act on SkyMiles loyalty accounts, and the Stories tab opens on its wording (the Vertical menu still offers Generic and Banking). Every party — good AS, evil AS, gateway, resource server, DCR proxy — is a mock inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted."
+      "The mock world is AirGuard Airlines, a fictional airline: the agents act on SkyMiles loyalty accounts, and the Stories tab opens on its wording (the Vertical menu still offers Generic and Banking). Every party — good AS, evil AS, gateway, resource server, DCR proxy — is a mock inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted."
     ]
   },
   {
