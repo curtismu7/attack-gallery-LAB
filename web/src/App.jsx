@@ -16,10 +16,16 @@ import LimitsPage from './pages/LimitsPage.jsx';
 import StoriesPage from './pages/StoriesPage.jsx';
 import DiagramPage from './pages/DiagramPage.jsx';
 import AsiPage from './pages/AsiPage.jsx';
+import ModeModal from "./mode-modal/ModeModal.jsx";
 import ShelfLink from "./components/ShelfLink.jsx";
 import VerifyMark from "./components/VerifyMark.jsx";
 
 const NAV = [['gallery', 'Gallery'], ['controls', 'Controls'], ['compare', 'Compare'], ['asi', 'OWASP ASI'], ['stories', 'Stories'], ['diagram', 'Diagram'], ['limits', 'Honest limits']];
+// The Real-or-mock modal's lines (it replaced the always-on simulation banner). This gallery has no live version, so the mode is always mock; the hosted build has its own line.
+const MODE_LINES = {
+  local: 'All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.',
+  hosted: 'Hosted and simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.',
+};
 const THEME_KEY = 'gallery.theme';
 const route = () => { const [name = 'gallery', arg] = (window.location.hash.replace(/^#\/?/, '') || 'gallery').split('/'); return { name, arg }; };
 const readTheme = () => { try { return localStorage.getItem(THEME_KEY); } catch { return null; } };
@@ -106,14 +112,12 @@ export default function App() {
         <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} talkOpen={talkOpen} setTalkOpen={setTalkOpen} helpOpen={helpOpen} setHelpOpen={setHelpOpen} />
       </header>
       <main id="main" tabIndex={-1} className="page">
-        {mockOnly
-          ? <div className="banner" role="note" data-testid="mock-only-banner">Hosted, simulated: all parties are mocks and the data is sample data. Nothing leaves this server: no real server, token, tenant or network address is contacted.</div>
-          : <div className="banner" role="note" data-testid="banner">All parties here are mocks running inside this app. Nothing leaves this machine: no real server, token, tenant or network address is contacted.</div>}
         {resetNote && <p className="muted small" role="status" data-testid="reset-note">{resetNote}</p>}
         {hasClaim(name) && <ClaimBanner />}
         <PresentBar claim={hasClaim(name) ? CLAIM_LABEL : null} />
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
+      <ModeModal mode="mock" lines={{ mock: mockOnly ? MODE_LINES.hosted : MODE_LINES.local }} storageKey="attack-gallery-mode" />
       <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
       <HelpDialog isOpen={helpOpen} onClose={() => setHelpOpen(false)} sections={HELP_SECTIONS} docsUrl="https://github.com/curtismu7/attack-gallery-LAB#readme" />
     </PresentProvider>

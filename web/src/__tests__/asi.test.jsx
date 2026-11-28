@@ -21,14 +21,14 @@ describe('the release-claim label', () => {
     expect(NO_CLAIM_ROUTES.sort()).toEqual(['compare', 'controls', 'diagram', 'stories']);
     for (const r of ['gallery', 'attack', 'asi', 'limits', 'anything-else']) expect(hasClaim(r)).toBe(true);
   });
-  it.each([['#/gallery', true], ['#/attack/wrong-scope', true], ['#/asi', true], ['#/limits', true], ['#/controls', false], ['#/compare', false], ['#/stories', false], ['#/diagram', false]])('%s: claim banner present = %s, next to (not instead of) the simulation banner', async (hash, claim) => {
+  it.each([['#/gallery', true], ['#/attack/wrong-scope', true], ['#/asi', true], ['#/limits', true], ['#/controls', false], ['#/compare', false], ['#/stories', false], ['#/diagram', false]])('%s: claim banner present = %s, next to (not instead of) the Mock modal', async (hash, claim) => {
     go(hash); await screen.findByRole('heading', { level: 1 });
-    expect(screen.getByTestId('banner')).toHaveTextContent(/mocks/i);
+    expect(screen.getByTestId('mode-modal')).toHaveTextContent(/mock/i); expect(screen.queryByTestId('banner')).toBeNull();
     if (claim) { expect(screen.getByTestId('claim-banner')).toHaveTextContent(CLAIM_LABEL); expect(screen.getByTestId('claim-banner')).toHaveTextContent(/not Ping features/); } else expect(screen.queryByTestId('claim-banner')).toBeNull();
   });
-  it('is also there beside the hosted-mock banner', async () => {
+  it('is also there beside the hosted Mock modal', async () => {
     await withFetch((real) => (url, init) => (url === '/api/health' ? Promise.resolve(new Response(JSON.stringify({ mode: 'mock-only' }))) : real(url, init)), async () => {
-      go('#/asi'); expect(await screen.findByTestId('mock-only-banner')).toBeInTheDocument(); expect(screen.getByTestId('claim-banner')).toBeInTheDocument();
+      go('#/asi'); await waitFor(() => expect(screen.getByTestId('mode-modal')).toHaveTextContent('Hosted and simulated')); expect(screen.queryByTestId('mock-only-banner')).toBeNull(); expect(screen.getByTestId('claim-banner')).toBeInTheDocument();
     });
   });
   it('stays on screen in presenter mode: in the bar on claim pages, absent on the others', async () => {
@@ -168,12 +168,12 @@ describe('page guard', () => {
       expect(screen.queryByTestId('page-error')).toBeNull(); expect(screen.getByText('fine')).toBeInTheDocument();
     } finally { console.error = quiet; }
   });
-  it('App: a page that throws keeps the header, the nav and both banners', async () => {
+  it('App: a page that throws keeps the header, the nav, the Mock modal and the claim banner', async () => {
     const quiet = console.error; console.error = () => {};
     await withFetch((real) => (url, init) => (url === '/api/asi' ? real(url, init).then(async (r) => { const j = await r.json(); j.rows = null; return new Response(JSON.stringify(j)); }) : real(url, init)), async () => {
       try {
         go('#/asi'); expect(await screen.findByTestId('page-error')).toBeInTheDocument();
-        expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument(); expect(screen.getByTestId('banner')).toBeInTheDocument(); expect(screen.getByTestId('claim-banner')).toBeInTheDocument();
+        expect(screen.getByRole('navigation', { name: 'Main' })).toBeInTheDocument(); expect(screen.getByTestId('mode-modal')).toBeInTheDocument(); expect(screen.getByTestId('claim-banner')).toBeInTheDocument();
         window.location.hash = '#/controls'; await screen.findByTestId('control-scope_check'); expect(screen.queryByTestId('page-error')).toBeNull();
       } finally { console.error = quiet; }
     });
