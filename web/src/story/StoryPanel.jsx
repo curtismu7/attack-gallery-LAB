@@ -2,7 +2,7 @@
 // with the chosen vertical. The switch is "Attack succeeds" (ungoverned wording) or "Control blocks" (governed wording).
 import { useMemo, useState } from 'react';
 import { usePresent } from '../present/PresentMode.jsx';
-import { STORIES, VERTICALS, verticalById } from './stories.js';
+import { DEFAULT_VERTICAL, STORIES, VERTICALS, verticalById } from './stories.js';
 import { fillAll } from './fill.js';
 import './story.css';
 
@@ -11,7 +11,7 @@ const read = (k, fallback) => { try { return localStorage.getItem(k) ?? fallback
 const write = (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage blocked: not remembered */ } };
 
 export default function StoryPanel({ story: raw }) {
-  const [verticalId, setVerticalId] = useState(() => read(KEYS.vertical, 'generic'));
+  const [verticalId, setVerticalId] = useState(() => read(KEYS.vertical, DEFAULT_VERTICAL));
   const [path, setPath] = useState(() => (read(KEYS.path, 'happy') === 'blocked' ? 'blocked' : 'happy'));
   const [localActive, setLocalActive] = useState(null);
   const presenter = usePresent();
@@ -70,7 +70,7 @@ export default function StoryPanel({ story: raw }) {
 
 /** The page's stories flattened into TalkTrackDialog steps (owner 2026-11-17: one pop-out talk track per page). */
 export function pageTalkSteps() {
-  const vertical = verticalById((() => { try { return localStorage.getItem(KEYS.vertical); } catch { return null; } })() || "generic");
+  const vertical = verticalById((() => { try { return localStorage.getItem(KEYS.vertical); } catch { return null; } })() || DEFAULT_VERTICAL);
   return STORIES.flatMap((raw) => {
     const story = fillAll(raw, vertical);
     return [

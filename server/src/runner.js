@@ -71,14 +71,14 @@ const STEPS = {
     push(S, step, { actor: 'evil AS', request: { op: 'redeem stolen code + verifier at the good AS' }, response: { token: view(out.access_token) }, verdict: 'ok' });
   },
   async 'proxy-login'(S, step) {
-    const { proxy } = S.world; S.browser = { user: USERS.mark.sub, cookies: new Set() };
+    const { proxy } = S.world; S.browser = { user: USERS.emma.sub, cookies: new Set() };
     const approvals = [];
     let r;
     for (let i = 0; i < 4; i++) {
       r = proxy.authorize({ client_id: CLIENTS.legit, redirect_uri: URLS.legitCallback, state: 's1', browser: S.browser });
-      if (r.needsConsent === 'mcp') { proxy.approveConsent(S.browser, CLIENTS.legit); approvals.push('MCP consent page for client-legit approved by Mark'); } else if (r.needsConsent === 'third-party') { proxy.thirdPartyApprove(S.browser); approvals.push('third-party AS consent for the static client id approved by Mark (cookie set)'); } else break;
+      if (r.needsConsent === 'mcp') { proxy.approveConsent(S.browser, CLIENTS.legit); approvals.push('MCP consent page for client-legit approved by Emma'); } else if (r.needsConsent === 'third-party') { proxy.thirdPartyApprove(S.browser); approvals.push('third-party AS consent for the static client id approved by Emma (cookie set)'); } else break;
     }
-    push(S, step, { actor: 'Mark', request: { op: 'authorize via client-legit', client_id: CLIENTS.legit }, response: { approvals, browser_cookies: [...S.browser.cookies], result: r.status === 302 ? 'redirected to the legitimate client' : r }, verdict: 'info' });
+    push(S, step, { actor: 'Emma', request: { op: 'authorize via client-legit', client_id: CLIENTS.legit }, response: { approvals, browser_cookies: [...S.browser.cookies], result: r.status === 302 ? 'redirected to the legitimate client' : r }, verdict: 'info' });
   },
   async 'dcr-register'(S, step) {
     const reg = S.world.proxy.register({ client_name: 'Totally Legit Notes', redirect_uris: [URLS.attackerCallback] });
@@ -113,15 +113,15 @@ const isPublicHop = (h) => h.address.startsWith(PUBLIC_PREFIX);
 
 // What the attacker walked away with, or null. Written so each reads the outcome, never the policy flags.
 const GAINS = {
-  'wrong-scope': (S) => (S.lastCall?.ok ? `moved ${S.lastCall.body.transferred} from ${S.lastCall.body.from} with a read-only token` : null),
-  'other-account': (S) => (S.lastCall?.ok ? `read Mary's account ${S.lastCall.body.account.id}, balance ${S.lastCall.body.account.balance}` : null),
-  'bad-client': (S) => (S.lastCall?.ok ? `an unregistered client read Mark's accounts (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
-  'rogue-actor': (S) => (S.lastCall?.ok ? `transfer of ${S.lastCall.body.transferred} executed, audit record names the actor "${S.lastCall.body.audit.actor}" although the signed token names ${CLIENTS.rogue}` : null),
-  impersonation: (S) => (S.lastCall?.ok ? `transfer of ${S.lastCall.body.transferred} executed with no agent in the audit record (actor: ${S.lastCall.body.audit.actor})` : null),
-  'raw-forwarding': (S) => (S.replay?.ok ? `the backend's log held Mark's live token; replayed at the gateway it listed ${S.replay.body.accounts.map((a) => a.id).join(', ')}` : null),
-  'issuer-mixup': (S) => (S.lastCall?.ok ? `the evil AS redeemed Mark's code and listed his accounts (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
-  'audience-confusion': (S) => (S.lastCall?.ok ? `a token issued for the billing API listed Mark's accounts at the gateway (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
-  'confused-deputy-dcr': (S) => (S.deputy?.status === 302 && S.deputy.location.startsWith(URLS.attackerCallback) ? `an MCP authorization code for Mark was delivered to ${URLS.attackerCallback} without consent` : null),
+  'wrong-scope': (S) => (S.lastCall?.ok ? `moved ${S.lastCall.body.transferred} miles from ${S.lastCall.body.from} with a read-only token` : null),
+  'other-account': (S) => (S.lastCall?.ok ? `read Noah's SkyMiles account ${S.lastCall.body.account.id}, balance ${S.lastCall.body.account.balance} miles` : null),
+  'bad-client': (S) => (S.lastCall?.ok ? `an unregistered client read Emma's accounts (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
+  'rogue-actor': (S) => (S.lastCall?.ok ? `transfer of ${S.lastCall.body.transferred} miles executed, audit record names the actor "${S.lastCall.body.audit.actor}" although the signed token names ${CLIENTS.rogue}` : null),
+  impersonation: (S) => (S.lastCall?.ok ? `transfer of ${S.lastCall.body.transferred} miles executed with no agent in the audit record (actor: ${S.lastCall.body.audit.actor})` : null),
+  'raw-forwarding': (S) => (S.replay?.ok ? `the backend's log held Emma's live token; replayed at the gateway it listed ${S.replay.body.accounts.map((a) => a.id).join(', ')}` : null),
+  'issuer-mixup': (S) => (S.lastCall?.ok ? `the evil AS redeemed Emma's code and listed her accounts (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
+  'audience-confusion': (S) => (S.lastCall?.ok ? `a token issued for the SkyMiles billing API listed Emma's accounts at the gateway (${S.lastCall.body.accounts.map((a) => a.id).join(', ')})` : null),
+  'confused-deputy-dcr': (S) => (S.deputy?.status === 302 && S.deputy.location.startsWith(URLS.attackerCallback) ? `an MCP authorization code for Emma was delivered to ${URLS.attackerCallback} without consent` : null),
   'ssrf-metadata': (S) => {
     const hit = S.fetches.filter((f) => f.internal.length && f.res.status === 200);
     return hit.length ? `reached ${hit.length} internal fake service(s): ${hit.map((f) => f.internal.at(-1).address).join(', ')}; got ${hit.map((f) => Object.keys(f.res.body).join('/')).join(' | ')}` : null;

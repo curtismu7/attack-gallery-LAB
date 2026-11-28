@@ -142,6 +142,21 @@ describe('controls, compare, limits', () => {
 });
 
 describe('stories page', () => {
+  it('opens on Meridian Air by default, in the story, the gallery lede and the attack page, and no leftover wording from the other packs', async () => {
+    go('#/stories'); await screen.findByTestId('story-panel');
+    expect(screen.getByLabelText('Vertical')).toHaveValue('airlines');
+    expect(screen.getByTestId('story-panel')).toHaveTextContent(/Story G1 · Meridian Air/); expect(screen.getByTestId('story-panel')).toHaveTextContent('the Meridian Air MCP gateway');
+    expect(screen.getByTestId('story-panel').textContent).not.toMatch(/statements API|crew-payroll|⟨missing/i);
+  });
+  it('a saved generic choice still opens on generic', async () => {
+    localStorage.setItem('gallery.story.vertical', 'generic');
+    go('#/stories'); await screen.findByTestId('story-panel');
+    expect(screen.getByLabelText('Vertical')).toHaveValue('generic'); expect(screen.getByTestId('story-panel')).toHaveTextContent('the MCP gateway');
+  });
+  it('the gallery page says Meridian Air', async () => {
+    go('#/gallery'); await screen.findByTestId('card-wrong-scope');
+    expect(document.getElementById('main')).toHaveTextContent('Meridian Air, a fictional airline');
+  });
   it('shows both stories, flips Attack succeeds / Control blocks and re-skins by vertical', async () => {
     go('#/stories'); await screen.findByTestId('story-panel');
     expect(screen.getByTestId('story-panel')).toHaveTextContent('The agent used my token somewhere else');

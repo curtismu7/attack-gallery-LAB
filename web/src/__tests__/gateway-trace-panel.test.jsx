@@ -32,7 +32,7 @@ describe('What Privilege did on the attack page', () => {
     expect(within(ungoverned).getAllByText(/HTTP 200/).length).toBeGreaterThan(0);
     // the exact request goes through the shared JsonPane, whole, with the token reduced to its length
     const req = within(governedSide).getAllByTestId(/-request-box$/).at(-1);
-    expect(req).toHaveTextContent('POST https://gw.gallery.example/mcp'); expect(req).toHaveTextContent('"name": "transfer_funds"');
+    expect(req).toHaveTextContent('POST https://gw.gallery.example/mcp'); expect(req).toHaveTextContent('"name": "transfer_miles"');
     expect(req).toHaveTextContent(/Bearer <token, \d+ characters, kept on the server>/);
     expect(document.body.textContent).not.toMatch(/eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/);
   });

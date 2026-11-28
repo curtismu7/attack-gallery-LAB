@@ -4,14 +4,14 @@ Generated from `server/src/catalog.js` by `node scripts/build-docs.mjs`. Do not 
 
 | Attack | Pack | Stopped by | Governed error | Ungoverned result | Governed result |
 | --- | --- | --- | --- | --- | --- |
-| `wrong-scope` (Wrong scope) | 1 | `scope_check` | `insufficient_scope` (403) | The transfer runs: the gateway never compares scope with the tool. | 403 insufficient_scope, named control: scope check. |
-| `other-account` (Another user's account) | 1 | `ownership_check` | `forbidden_object` (403) | Mary's balance comes back. | 403 forbidden_object, named control: per-user ownership check. |
-| `bad-client` (Bad client) | 1 | `client_allowlist` | `unauthorized_client` (403) | The attacker app reads Mark's accounts. | 403 unauthorized_client, named control: client allowlist. |
-| `rogue-actor` (Rogue actor in the act claim) | 1 | `act_validation` | `unauthorized_actor` (403) | The transfer runs and the audit record names agent-ok, the trusted agent. | 403 unauthorized_actor on the signed act claim; the header is ignored. |
-| `impersonation` (Impersonation) | 1 | `require_delegation` | `delegation_required` (403) | The transfer runs; the audit record shows no actor at all. | 403 delegation_required, named control: delegation required. |
-| `raw-forwarding` (Raw token forwarding) | 1 | `no_token_forwarding` | `token_forwarding_blocked` (200) | The backend holds a replayable copy of Mark's token and reads his accounts. | The gateway exchanged the token; the backend holds a different, short-lived one. Named control: no raw token forwarding. |
-| `issuer-mixup` (Issuer mix-up (RFC 9207)) | 2 | `iss_check` | `iss_mismatch` (400) | The evil AS ends up with a working token for Mark. | The client compares iss with the issuer it expected, rejects the response and never sends the code. Named control: iss check. |
-| `audience-confusion` (Token passthrough and audience confusion (RFC 8707)) | 2 | `audience_binding` | `invalid_token` (401) | Signature and issuer are fine, so the gateway accepts it and lists Mark's accounts. | 401 invalid_token: aud does not include the gateway. Named control: audience binding. |
+| `wrong-scope` (Wrong scope) | 1 | `scope_check` | `insufficient_scope` (403) | The miles transfer runs: the gateway never compares scope with the tool. | 403 insufficient_scope, named control: scope check. |
+| `other-account` (Another user's account) | 1 | `ownership_check` | `forbidden_object` (403) | Noah's miles balance comes back. | 403 forbidden_object, named control: per-user ownership check. |
+| `bad-client` (Bad client) | 1 | `client_allowlist` | `unauthorized_client` (403) | The attacker app reads Emma's accounts. | 403 unauthorized_client, named control: client allowlist. |
+| `rogue-actor` (Rogue actor in the act claim) | 1 | `act_validation` | `unauthorized_actor` (403) | The miles transfer runs and the audit record names agent-ok, the trusted agent. | 403 unauthorized_actor on the signed act claim; the header is ignored. |
+| `impersonation` (Impersonation) | 1 | `require_delegation` | `delegation_required` (403) | The miles transfer runs; the audit record shows no actor at all. | 403 delegation_required, named control: delegation required. |
+| `raw-forwarding` (Raw token forwarding) | 1 | `no_token_forwarding` | `token_forwarding_blocked` (200) | The backend holds a replayable copy of Emma's token and reads her accounts. | The gateway exchanged the token; the backend holds a different, short-lived one. Named control: no raw token forwarding. |
+| `issuer-mixup` (Issuer mix-up (RFC 9207)) | 2 | `iss_check` | `iss_mismatch` (400) | The evil AS ends up with a working token for Emma. | The client compares iss with the issuer it expected, rejects the response and never sends the code. Named control: iss check. |
+| `audience-confusion` (Token passthrough and audience confusion (RFC 8707)) | 2 | `audience_binding` | `invalid_token` (401) | Signature and issuer are fine, so the gateway accepts it and lists Emma's accounts. | 401 invalid_token: aud does not include the gateway. Named control: audience binding. |
 | `confused-deputy-dcr` (Confused deputy via static client ID and DCR) | 2 | `consent_check` | `consent_required` (200) | The third-party AS skips consent (cookie) and the code is redirected to attacker.example. | Stopped at the proxy's own consent page for this client_id. Named control: per-client consent. |
 | `ssrf-metadata` (SSRF via metadata) | 2 | `ssrf_guard` | `ssrf_blocked` (400) | Fake cloud, loopback and private-range services answer; their data is the attacker's gain. | Each non-public target is refused before any connection. Named control: SSRF guard. |
 
@@ -19,16 +19,16 @@ Generated from `server/src/catalog.js` by `node scripts/build-docs.mjs`. Do not 
 
 Pack 1. Named control: `scope_check`.
 
-**Goal.** Make a transfer with a token that only carries accounts:read.
+**Goal.** Transfer miles with a token that only carries accounts:read.
 
-**Story.** An agent holds a read-only token for Mark and calls the write tool anyway.
+**Story.** An agent holds a read-only token for Emma and calls the write tool anyway.
 
 **OWASP ASI (lab reading).** ASI02 (related), ASI03 (primary)
 
 **Steps.**
 
-1. Mark authorises the app with read-only scope
-2. Call transfer_funds (needs accounts:write)
+1. Emma authorises the app with read-only scope
+2. Call transfer_miles (needs accounts:write)
 
 **References.**
 
@@ -39,7 +39,7 @@ Pack 1. Named control: `scope_check`.
 
 Pack 1. Named control: `ownership_check`.
 
-**Goal.** Read Mary's account with Mark's valid token.
+**Goal.** Read Noah's SkyMiles account with Emma's valid token.
 
 **Story.** Valid token, valid scope, someone else's object id (object-level access).
 
@@ -47,8 +47,8 @@ Pack 1. Named control: `ownership_check`.
 
 **Steps.**
 
-1. Mark has a normal read token
-2. Ask for acc-2001 (Mary's)
+1. Emma has a normal read token
+2. Ask for acc-2001 (Noah's)
 
 **References.**
 
@@ -59,16 +59,16 @@ Pack 1. Named control: `ownership_check`.
 
 Pack 1. Named control: `client_allowlist`.
 
-**Goal.** Use Mark's token through an app the operator never registered.
+**Goal.** Use Emma's token through an app the operator never registered.
 
-**Story.** Mark is phished into authorising an attacker app. The token is genuine; the client is not on the list.
+**Story.** Emma is phished into authorising an attacker app. The token is genuine; the client is not on the list.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
-1. Mark authorises client-attacker
-2. The attacker app lists Mark's accounts
+1. Emma authorises client-attacker
+2. The attacker app lists Emma's accounts
 
 **References.**
 
@@ -79,7 +79,7 @@ Pack 1. Named control: `client_allowlist`.
 
 Pack 1. Named control: `act_validation`.
 
-**Goal.** Move money as the trusted agent while a rogue agent holds the token (actor injection / confused deputy).
+**Goal.** Move miles as the trusted agent while a rogue agent holds the token (actor injection / confused deputy).
 
 **Story.** The token's signed act names agent-rogue. The caller also sends X-Actor-Client: agent-ok to be recorded as the trusted agent. See AI-DEMO2 docs/use-cases/confused-deputy-actor-injection.md.
 
@@ -88,7 +88,7 @@ Pack 1. Named control: `act_validation`.
 **Steps.**
 
 1. agent-rogue performs a real exchange: act.sub = agent-rogue
-2. transfer_funds with a forged X-Actor-Client header
+2. transfer_miles with a forged X-Actor-Client header
 
 **References.**
 
@@ -100,14 +100,14 @@ Pack 1. Named control: `require_delegation`.
 
 **Goal.** Call an agent-only tool with a bare user token so the agent leaves no trace.
 
-**Story.** Mark's user token has no act claim. The call looks like Mark himself.
+**Story.** Emma's user token has no act claim. The call looks like Emma himself.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
-1. A user token for Mark, no act claim
-2. transfer_funds without any agent identity
+1. A user token for Emma, no act claim
+2. transfer_miles without any agent identity
 
 **References.**
 
@@ -117,16 +117,16 @@ Pack 1. Named control: `require_delegation`.
 
 Pack 1. Named control: `no_token_forwarding`.
 
-**Goal.** Capture Mark's live token from a downstream service's logs and replay it.
+**Goal.** Capture Emma's live token from a downstream service's logs and replay it.
 
-**Story.** The gateway passes the inbound bearer token to a third-party billing backend. Anything that backend logs is now a working credential.
+**Story.** The gateway passes the inbound bearer token to a third-party SkyMiles billing backend. Anything that backend logs is now a working credential.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
-1. Mark's token for the gateway
-2. sync_statement makes the gateway call the billing backend
+1. Emma's token for the gateway
+2. sync_statement makes the gateway call the SkyMiles billing backend
 3. The backend operator replays what its log captured
 
 **References.**
@@ -138,7 +138,7 @@ Pack 1. Named control: `no_token_forwarding`.
 
 Pack 2. Named control: `iss_check`.
 
-**Goal.** Get Mark's authorization code and PKCE verifier delivered to an evil authorization server.
+**Goal.** Get Emma's authorization code and PKCE verifier delivered to an evil authorization server.
 
 **Story.** The client starts with the evil AS. The evil AS bounces the user to the good AS, which issues a code. The response carries iss = the good AS, but the client believes it is talking to the evil one.
 
@@ -150,7 +150,7 @@ Pack 2. Named control: `iss_check`.
 2. Evil AS redirects the signed-in user to the good AS; good AS answers the client
 3. Client handles the authorization response
 4. Evil AS redeems the code it received at the good AS
-5. Attacker lists Mark's accounts with the redeemed token
+5. Attacker lists Emma's accounts with the redeemed token
 
 **References.**
 
@@ -162,13 +162,13 @@ Pack 2. Named control: `audience_binding`.
 
 **Goal.** Use a token issued for a different resource at the gateway.
 
-**Story.** Mark's token was issued for the billing API (aud = billing). The attacker presents it at the MCP gateway.
+**Story.** Emma's token was issued for the SkyMiles billing API (aud = billing). The attacker presents it at the MCP gateway.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
-1. A genuine token for Mark, audience = billing API
+1. A genuine token for Emma, audience = SkyMiles billing API
 2. Present the billing-audience token at the gateway
 
 **References.**
@@ -181,17 +181,17 @@ Pack 2. Named control: `audience_binding`.
 
 Pack 2. Named control: `consent_check`.
 
-**Goal.** Have Mark's MCP authorization code delivered to an attacker's redirect URI without his approval.
+**Goal.** Have Emma's MCP authorization code delivered to an attacker's redirect URI without her approval.
 
-**Story.** An MCP proxy uses one static client ID at a third-party AS. Mark consented once, so the third-party AS sets a consent cookie. The attacker registers a client by DCR with their own redirect URI and sends Mark a link.
+**Story.** An MCP proxy uses one static client ID at a third-party AS. Emma consented once, so the third-party AS sets a consent cookie. The attacker registers a client by DCR with their own redirect URI and sends Emma a link.
 
 **OWASP ASI (lab reading).** ASI03 (primary)
 
 **Steps.**
 
-1. Mark signs in through the legitimate client (consent approved, cookie set)
+1. Emma signs in through the legitimate client (consent approved, cookie set)
 2. Attacker registers a client by DCR with redirect_uri = attacker.example
-3. Mark's browser opens the attacker's authorization link
+3. Emma's browser opens the attacker's authorization link
 
 **References.**
 

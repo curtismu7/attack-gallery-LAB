@@ -88,8 +88,9 @@ try {
 
   // stories
   await go('stories'); await page.getByTestId('story-panel').waitFor();
+  check((await page.getByTestId('story-panel').innerText()).includes('Meridian Air'), 'story G1 opens on the default pack, Meridian Air');
   await page.getByRole('button', { name: 'Control blocks' }).click(); await page.getByLabel('Vertical').selectOption('airlines');
-  check((await page.getByTestId('story-panel').innerText()).includes('crew-payroll API'), 'story G1 re-skins to the airlines pack');
+  check((await page.getByTestId('story-panel').innerText()).includes('SkyMiles billing API'), 'story G1 re-skins to the airlines pack');
   await shot('story-g1-airlines');
   await page.getByRole('button', { name: 'Which authorization server is this?' }).click(); await page.getByLabel('Vertical').selectOption('banking');
   check((await page.getByTestId('story-panel').innerText()).includes('bank'), 'story G2 in the banking pack'); await shot('story-g2-banking');

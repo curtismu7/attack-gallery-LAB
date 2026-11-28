@@ -18,49 +18,49 @@ Which attack touches which row is our reading, not the deck's. 6 of 10 rows have
 
 Maps to ASI02 Tool Misuse & Exploitation (related) and ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI02: AIGuard: path traversal, destructive commands, SSRF and over-broad scope detection. ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: The transfer runs: the gateway never compares scope with the tool. Governed: 403 insufficient_scope, named control: scope check. The control is this gallery's mock "Scope check" (`scope_check`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The miles transfer runs: the gateway never compares scope with the tool. Governed: 403 insufficient_scope, named control: scope check. The control is this gallery's mock "Scope check" (`scope_check`), a control of that kind, not a Privilege feature.
 
 ### Another user's account
 
 Maps to ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: Mary's balance comes back. Governed: 403 forbidden_object, named control: per-user ownership check. The control is this gallery's mock "Per-user ownership check" (`ownership_check`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: Noah's miles balance comes back. Governed: 403 forbidden_object, named control: per-user ownership check. The control is this gallery's mock "Per-user ownership check" (`ownership_check`), a control of that kind, not a Privilege feature.
 
 ### Bad client
 
 Maps to ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: The attacker app reads Mark's accounts. Governed: 403 unauthorized_client, named control: client allowlist. The control is this gallery's mock "Client allowlist" (`client_allowlist`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The attacker app reads Emma's accounts. Governed: 403 unauthorized_client, named control: client allowlist. The control is this gallery's mock "Client allowlist" (`client_allowlist`), a control of that kind, not a Privilege feature.
 
 ### Rogue actor in the act claim
 
 Maps to ASI03 Identity & Privilege Abuse (primary) and ASI10 Rogue Agents (related): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation. ASI10: Gateway: no agent reaches a model, tool or peer without a valid scoped key; instant revocation; bounded spend. The deck adds: in-gateway rogue-agent access scoring supplements it.
 
-Run it both ways. Ungoverned: The transfer runs and the audit record names agent-ok, the trusted agent. Governed: 403 unauthorized_actor on the signed act claim; the header is ignored. The control is this gallery's mock "Actor (act claim) validation" (`act_validation`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The miles transfer runs and the audit record names agent-ok, the trusted agent. Governed: 403 unauthorized_actor on the signed act claim; the header is ignored. The control is this gallery's mock "Actor (act claim) validation" (`act_validation`), a control of that kind, not a Privilege feature.
 
 ### Impersonation
 
 Maps to ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: The transfer runs; the audit record shows no actor at all. Governed: 403 delegation_required, named control: delegation required. The control is this gallery's mock "Delegation required (impersonation block)" (`require_delegation`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The miles transfer runs; the audit record shows no actor at all. Governed: 403 delegation_required, named control: delegation required. The control is this gallery's mock "Delegation required (impersonation block)" (`require_delegation`), a control of that kind, not a Privilege feature.
 
 ### Raw token forwarding
 
 Maps to ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: The backend holds a replayable copy of Mark's token and reads his accounts. Governed: The gateway exchanged the token; the backend holds a different, short-lived one. Named control: no raw token forwarding. The control is this gallery's mock "No raw token forwarding (exchange instead)" (`no_token_forwarding`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The backend holds a replayable copy of Emma's token and reads her accounts. Governed: The gateway exchanged the token; the backend holds a different, short-lived one. Named control: no raw token forwarding. The control is this gallery's mock "No raw token forwarding (exchange instead)" (`no_token_forwarding`), a control of that kind, not a Privilege feature.
 
 ### Issuer mix-up (RFC 9207)
 
 Maps to ASI03 Identity & Privilege Abuse (primary) and ASI04 Agentic Supply Chain (related): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation. ASI04: AIGuard: description-injection and typosquatting detection on tool definitions; fingerprint pinning pending. Fingerprint pinning is PENDING in the deck.
 
-Run it both ways. Ungoverned: The evil AS ends up with a working token for Mark. Governed: The client compares iss with the issuer it expected, rejects the response and never sends the code. Named control: iss check. The control is this gallery's mock "Issuer check on the authorization response (RFC 9207)" (`iss_check`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: The evil AS ends up with a working token for Emma. Governed: The client compares iss with the issuer it expected, rejects the response and never sends the code. Named control: iss check. The control is this gallery's mock "Issuer check on the authorization response (RFC 9207)" (`iss_check`), a control of that kind, not a Privilege feature.
 
 ### Token passthrough and audience confusion (RFC 8707)
 
 Maps to ASI03 Identity & Privilege Abuse (primary): lab reading. The deck says (deck claim, unverified on our tenant) ASI03: Gateway + AIGuard: per-user virtual keys, least-privilege scopes, per-application RBAC, live revocation.
 
-Run it both ways. Ungoverned: Signature and issuer are fine, so the gateway accepts it and lists Mark's accounts. Governed: 401 invalid_token: aud does not include the gateway. Named control: audience binding. The control is this gallery's mock "Audience binding (RFC 8707)" (`audience_binding`), a control of that kind, not a Privilege feature.
+Run it both ways. Ungoverned: Signature and issuer are fine, so the gateway accepts it and lists Emma's accounts. Governed: 401 invalid_token: aud does not include the gateway. Named control: audience binding. The control is this gallery's mock "Audience binding (RFC 8707)" (`audience_binding`), a control of that kind, not a Privilege feature.
 
 ### Confused deputy via static client ID and DCR
 

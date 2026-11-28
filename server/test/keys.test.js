@@ -5,9 +5,9 @@ import { createIssuer, verifyAccessToken, describeToken } from '../src/keys.js';
 for (const alg of ['ES256', 'RS256']) {
   test(`${alg}: mint then verify, and the description never contains the signature`, async () => {
     const iss = await createIssuer('https://as.gallery.example', alg);
-    const t = await iss.mint({ sub: 'user-mark', aud: 'x' });
+    const t = await iss.mint({ sub: 'user-emma', aud: 'x' });
     const claims = await verifyAccessToken(t, iss);
-    assert.equal(claims.sub, 'user-mark');
+    assert.equal(claims.sub, 'user-emma');
     const d = describeToken(t);
     assert.equal(d.header.alg, alg);
     assert.ok(!JSON.stringify(d).includes(t.split('.')[2]));
