@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { getControls, getHealth, getInfo, resetKeys, setMode } from './api.js';
 import TopMenu, { applyFontSize } from './top-menu/TopMenu.jsx';
 import TalkTrackDialog from "./talk-track/TalkTrackDialog.jsx";
+import HelpDialog from "./help-dialog/HelpDialog.jsx";
+import { HELP_SECTIONS } from "./helpContent";
 import { pageTalkSteps } from "./story/StoryPanel";
 import { ClaimBanner, Loading, PageGuard, useLoad } from './components/bits.jsx';
 import { CLAIM_LABEL, hasClaim } from './data/claim.js';
@@ -37,7 +39,7 @@ const FONT_KEY = 'gallery.font';
 const readFont = () => { try { const f = localStorage.getItem(FONT_KEY); return ['S', 'M', 'L'].includes(f) ? f : 'M'; } catch { return 'M'; } };
 const saveFont = (f) => { try { localStorage.setItem(FONT_KEY, f); } catch { /* not remembered */ } };
 
-function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset, talkOpen, setTalkOpen }) {
+function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, setFontStep, onReset, talkOpen, setTalkOpen, helpOpen, setHelpOpen }) {
   const { present, set: setPresent } = usePresent();
   return (
     <TopMenu
@@ -46,7 +48,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
       fontSize={{ value: fontStep, onChange: setFontStep }}
       present={{ active: present, onToggle: () => setPresent(!present), label: 'Present' }}
       talkTrack={{ active: talkOpen, onToggle: () => setTalkOpen((v) => !v) }}
-      help={{ href: 'https://github.com/curtismu7/attack-gallery-LAB#readme' }}
+      help={{ onClick: () => setHelpOpen(true), title: 'What this lab is, and what is simulated' }}
       onReset={onReset}
     >
       <ShelfLink />
@@ -58,6 +60,7 @@ function MenuTools({ modeInfo, selectMode, theme, setThemePersist, fontStep, set
 export default function App() {
   const { name, arg } = useRoute();
   const [talkOpen, setTalkOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [theme, setThemePersist] = useTheme();
   const [fontStep, setFontStep] = useState(readFont);
   const ctl = useLoad(getControls);
@@ -100,7 +103,7 @@ export default function App() {
             : <span className="shell-badge" data-testid="mode-badge">Mock</span>}
         </span>
         <nav className="shell-nav" aria-label="Main">{NAV.map(([id, label]) => <a key={id} href={`#/${id}`} aria-current={(name === id || (id === 'gallery' && name === 'attack')) ? 'page' : undefined}>{label}</a>)}</nav>
-        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} talkOpen={talkOpen} setTalkOpen={setTalkOpen} />
+        <MenuTools modeInfo={modeInfo} selectMode={selectMode} theme={theme} setThemePersist={setThemePersist} fontStep={fontStep} setFontStep={setFontStep} onReset={reset} talkOpen={talkOpen} setTalkOpen={setTalkOpen} helpOpen={helpOpen} setHelpOpen={setHelpOpen} />
       </header>
       <main id="main" tabIndex={-1} className="page">
         {mockOnly
@@ -112,6 +115,7 @@ export default function App() {
         <PageGuard resetKey={`${name}/${arg}`}><Loading state={ctl}>{() => page()}</Loading></PageGuard>
       </main>
       <TalkTrackDialog isOpen={talkOpen} onClose={() => setTalkOpen(false)} talk={pageTalkSteps()} />
+      <HelpDialog isOpen={helpOpen} onClose={() => setHelpOpen(false)} sections={HELP_SECTIONS} docsUrl="https://github.com/curtismu7/attack-gallery-LAB#readme" />
     </PresentProvider>
   );
 }
